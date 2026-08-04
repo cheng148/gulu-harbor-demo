@@ -5,10 +5,10 @@
 - 项目：咕噜港AI选宠顾问Demo
 - 版本：0.1.0
 - 创建日期：2026-08-04
-- 输入：`specs/SDD_SPEC.md` 0.2.0、`specs/IMPLEMENTATION_PLAN.md` 0.1.0
-- 状态：第一批Phase 0（T00至T05）已完成并通过检查点A、B
-- 当前事实：工具链与空项目已编码、运行和测试；选宠业务功能尚未编码、运行、测试或部署
-- 门禁：第二批Phase 1未获批准前，不得实施T06及后续业务任务
+- 输入：`specs/SDD_SPEC.md` 0.2.1、`specs/IMPLEMENTATION_PLAN.md` 0.1.1
+- 状态：第二批Phase 1进行中；T06至T11已完成并通过检查点C、D、E
+- 当前事实：画像、合并、硬约束、冲突、动态追问和推荐就绪规则已编码并测试；目录与匹配尚未完成
+- 门禁：只实施已批准的T12至T13，不提前进入Phase 2
 
 ## 1. 小白阅读说明
 
@@ -167,7 +167,7 @@
 
 ### T13 建立最小测试数据并实现过滤、排序、去分
 
-- 结果：至少12个方向、24个虚构档案；硬过滤后稳定排序；公开结果只有等级，没有数字分。
+- 结果：按用户批准名单建立8个方向、16个虚构档案；硬过滤后稳定排序；公开结果只有等级，没有数字分。
 - 文件：`backend/app/data/directions.json`、`backend/app/data/pets.json`、`backend/app/domain/matching.py`、`backend/tests/domain/test_matching.py`、`backend/tests/domain/test_public_result.py`
 - 依赖：T08、T12；映射：SDD 12至14、AC-011至015；RED/GREEN：不匹配样本、并列排序和数字泄漏测试。
 
