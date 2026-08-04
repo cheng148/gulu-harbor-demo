@@ -44,7 +44,9 @@ def evaluate_session_constraints(
 ) -> tuple[ConstraintDecision, ...]:
     decisions: list[ConstraintDecision] = []
 
-    if profile.petAllowed.status not in {SlotStatus.CONFIRMED, SlotStatus.DECLINED}:
+    if profile.petAllowed.status not in {SlotStatus.CONFIRMED, SlotStatus.DECLINED} or (
+        profile.petAllowed.value is YesNoUncertain.UNCERTAIN
+    ):
         decisions.append(
             ConstraintDecision(
                 outcome=ConstraintOutcome.CLARIFY,

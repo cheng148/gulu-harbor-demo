@@ -1,0 +1,13 @@
+[
+  {"questionId":"confirm-pet-permission","targetSlots":["petAllowed"],"category":"BLOCKER","fixedOrder":0,"promptTemplateId":"pet-permission","prompt":"你的住房、房东或物业规定明确允许养猫或养狗吗？","quickReplies":["明确允许","明确不允许","还不确定"]},
+  {"questionId":"confirm-household-consent","targetSlots":["householdConsent"],"category":"CRITICAL","fixedOrder":1,"promptTemplateId":"household-consent","prompt":"共同居住的人是否都同意养宠？","quickReplies":["都同意","有人反对","还没讨论"]},
+  {"questionId":"confirm-allergy","targetSlots":["allergyLevel"],"category":"CRITICAL","fixedOrder":2,"promptTemplateId":"allergy","prompt":"你或同住家人接触猫狗后有过敏反应吗？","quickReplies":["没有","轻微或不确定","严重过敏","不想回答"]},
+  {"questionId":"confirm-stable-care","targetSlots":["stableCarePlan"],"category":"CRITICAL","fixedOrder":3,"promptTemplateId":"stable-care","prompt":"未来几年里，是否有稳定的人每天负责喂养、清洁和就医？","quickReplies":["有稳定安排","目前没有","还不确定"]},
+  {"questionId":"confirm-companion-and-alone-time","targetSlots":["dailyCompanionHours","aloneHours"],"category":"CRITICAL","fixedOrder":4,"promptTemplateId":"companion-time","prompt":"普通工作日里，宠物每天大约会独处多久？","quickReplies":["少于4小时","4至8小时","8至10小时","超过10小时"]},
+  {"questionId":"confirm-exercise-time","targetSlots":["dailyExerciseMinutes"],"category":"CRITICAL","fixedOrder":5,"promptTemplateId":"exercise-time","prompt":"你每天能稳定安排多少分钟陪宠物运动或互动？","quickReplies":["少于20分钟","20至45分钟","45至90分钟","90分钟以上"]},
+  {"questionId":"confirm-budget","targetSlots":["monthlyBudgetCny","emergencyBudgetReady"],"category":"CRITICAL","fixedOrder":6,"promptTemplateId":"budget","prompt":"除初始费用外，你能稳定承担的每月预算和突发医疗准备大致怎样？","quickReplies":["500元内","500至1000元","1000元以上","暂不确定"]},
+  {"questionId":"confirm-housing-space","targetSlots":["housingType","spaceLevel"],"category":"CRITICAL","fixedOrder":7,"promptTemplateId":"housing-space","prompt":"你目前住在什么类型和大小的空间？","quickReplies":["小户型公寓","普通公寓","较大住宅","其他"]},
+  {"questionId":"confirm-household-safety","targetSlots":["householdMembers","otherPets"],"category":"CRITICAL","fixedOrder":8,"promptTemplateId":"household-safety","prompt":"家里是否有幼儿、老人、孕妇或其他宠物？","quickReplies":["都没有","有幼儿","有老人或孕妇","有其他宠物","有多种情况"]},
+  {"questionId":"confirm-burden-tolerance","targetSlots":["sheddingTolerance","noiseTolerance","odorTolerance","groomingTolerance"],"category":"CRITICAL","fixedOrder":9,"promptTemplateId":"burden-tolerance","prompt":"掉毛、叫声、气味和日常美容里，你最不能接受哪一项？","quickReplies":["掉毛","叫声","气味","频繁美容","都可商量"]},
+  {"questionId":"ask-size-preference","targetSlots":["sizePreference"],"category":"PREFERENCE","fixedOrder":100,"promptTemplateId":"size-preference","prompt":"在安全和照护条件都合适的前提下，你更喜欢什么体型？","quickReplies":["小型","中型","大型","都可以"]}
+]
