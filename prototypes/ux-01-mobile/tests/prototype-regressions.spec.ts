@@ -51,3 +51,26 @@ test("chat title follows the current stage and nav uses one component style", as
   await expect(navButtons).toHaveCount(4);
   await expect(navButtons.nth(1)).toHaveClass(/on/);
 });
+
+test("pet tab always keeps the paw icon and nav geometry", async ({ page }) => {
+  const petButton = page.getByRole("button", { name: "选宠" });
+  await expect(petButton.locator("[data-icon=pet-paw]")).toBeVisible();
+  const before = await page.locator(".nav").boundingBox();
+  await page.getByRole("button", { name: "首页" }).click();
+  const after = await page.locator(".nav").boundingBox();
+  expect(after).toEqual(before);
+  await expect(page.getByRole("button", { name: "选宠" }).locator("[data-icon=pet-paw]")).toBeVisible();
+});
+
+test("reset action sits at the bottom of the conversation, not in the header", async ({ page }) => {
+  await expect(page.getByTestId("chat-fixed-header").getByRole("button", { name: "重新开始" })).toHaveCount(0);
+  await expect(page.locator(".chat-reset-action")).toHaveText("重新开始");
+});
+
+test("real touch devices expose native text input mode", async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, "maxTouchPoints", { value: 5 }));
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "开始聊聊" }).click();
+  await page.getByPlaceholder("比如：白天要上班，晚上可以陪它玩一会儿……").click();
+  await expect(page.getByTestId("keyboard-dock")).toHaveAttribute("data-native-input", "true");
+});

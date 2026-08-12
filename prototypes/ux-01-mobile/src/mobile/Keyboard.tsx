@@ -35,6 +35,10 @@ type KeyboardInputProps = InputHTMLAttributes<HTMLInputElement> & {
 
 const KeyboardContext = createContext<KeyboardContextValue | null>(null);
 
+function usesNativeInputMethod() {
+  return typeof navigator !== "undefined" && navigator.maxTouchPoints > 0;
+}
+
 export function KeyboardProvider({ children }: PropsWithChildren) {
   const { device } = useMobileDevice();
   const [visible, setVisible] = useState(false);
@@ -200,6 +204,11 @@ export function KeyboardInput(props: KeyboardInputProps) {
       ref={ref}
       onFocus={(event) => {
         const element = event.currentTarget;
+        if (usesNativeInputMethod()) {
+          keyboard.hide();
+          inputProps.onFocus?.(event);
+          return;
+        }
         keyboard.show(element, (value) => {
           inputProps.onChange?.({ target: { ...element, value }, currentTarget: { ...element, value } } as unknown as React.ChangeEvent<HTMLInputElement>);
         });
@@ -217,6 +226,11 @@ export function KeyboardTextarea(props: TextareaHTMLAttributes<HTMLTextAreaEleme
       {...props}
       onFocus={(event) => {
         const element = event.currentTarget;
+        if (usesNativeInputMethod()) {
+          keyboard.hide();
+          props.onFocus?.(event);
+          return;
+        }
         keyboard.show(element, (value) => {
           props.onChange?.({ target: { ...element, value }, currentTarget: { ...element, value } } as unknown as React.ChangeEvent<HTMLTextAreaElement>);
         });
@@ -229,6 +243,7 @@ export function KeyboardTextarea(props: TextareaHTMLAttributes<HTMLTextAreaEleme
 export function KeyboardDock() {
   const keyboard = useKeyboard();
   const { device } = useMobileDevice();
+  const nativeInput = usesNativeInputMethod();
   const dismissDrag = useKeyboardDismissDrag();
   const keyboardTransition = keyboard.isDragging
     ? { duration: 0 }
@@ -248,6 +263,7 @@ export function KeyboardDock() {
       data-platform={device.platform}
       data-testid="keyboard-dock"
       data-visible={keyboard.visible ? "true" : "false"}
+      data-native-input={nativeInput ? "true" : "false"}
       initial={{ y: keyboard.fullHeight }}
       animate={{ y: keyboard.visible ? keyboard.dragOffset : keyboard.fullHeight }}
       aria-hidden={keyboard.visible ? undefined : "true"}

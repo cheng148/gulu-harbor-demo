@@ -1,8 +1,9 @@
 import { useState, type CSSProperties } from "react";
 import {
-  ArrowLeftIcon, ArrowRightIcon, ChatBubbleIcon, CheckCircledIcon,
+  ArrowLeftIcon, ArrowRightIcon, CheckCircledIcon,
   ClockIcon, ExclamationTriangleIcon, HeartIcon, HomeIcon, MagnifyingGlassIcon, PersonIcon, ReloadIcon, ResetIcon
 } from "@radix-ui/react-icons";
+import { PawPrint } from "lucide-react";
 import { BottomSheet, KeyboardInput, KeyboardTextarea, MobileScroll, useKeyboard, useMobileDevice } from "./mobile";
 
 type Screen = "home"|"market"|"chat"|"profile"|"allergy"|"results"|"edit"|"states"|"expired"|"error";
@@ -49,15 +50,12 @@ export default function Prototype(){
   const Home=()=> <main className="home home-approved">
     <img className="approved-home-image" src="/assets/gulu/approved-ai-entry.png" alt="咕噜港AI选宠入口：聊一聊，遇见更合拍的它"/>
     <button className="approved-hotspot approved-start" aria-label="开始聊聊" onClick={()=>go("chat")}/>
-    <nav className="approved-home-nav" aria-label="主导航">
-      <button aria-label="首页" onClick={()=>selectTab("home")}/><button aria-label="选宠" onClick={()=>selectTab("pet")}/><button aria-label="社区" onClick={()=>selectTab("community")}/><button aria-label="我的" onClick={()=>selectTab("mine")}/>
-    </nav>
   </main>;
 
   const Market=()=> {const visible=pets.filter(p=>marketFilter==="全部"||marketFilter==="猫猫"&&String(p[2]).includes("猫")||marketFilter==="狗狗"&&(String(p[2]).includes("犬")||String(p[2]).includes("狗")));return <main className="page market-home">
     <div className="virtual-banner"><ExclamationTriangleIcon/><span><b>Demo虚拟数据</b><small>销量、好评和店铺热度均为原型演示</small></span></div>
     <div className="market-search"><MagnifyingGlassIcon/><KeyboardInput value={marketQuery} onChange={e=>setMarketQuery(e.target.value)} placeholder="搜索宠物、品种或合作店铺"/></div>
-    <section className="market-agent"><span><em>AI选宠顾问</em><h2>不知道选谁？<br/>先从你的生活聊起</h2><button onClick={()=>setScreen("home")}>去聊聊<ArrowRightIcon/></button></span><img src="/assets/gulu/harbor-hero.png" alt="猫狗与海港灯塔插画"/></section>
+    <section className="market-agent"><span><em>AI选宠顾问</em><h2>不知道选谁？<br/>先从你的生活聊起</h2><button onClick={()=>selectTab("pet")}>去聊聊<ArrowRightIcon/></button></span><img src="/assets/gulu/harbor-hero.png" alt="猫狗与海港灯塔插画"/></section>
     <div className="market-cats">{["全部","猫猫","狗狗","合作店铺"].map(x=><button className={marketFilter===x?"on":""} key={x} onClick={()=>setMarketFilter(x)}>{x}</button>)}</div>
     {marketFilter!=="合作店铺"&&<><div className="market-title"><span><em>本期推荐</em><h3>最近值得认识的小家伙</h3></span><small>演示排序</small></div><div className="market-grid">{visible.filter(p=>!marketQuery||p.join("").includes(marketQuery)).map((p,i)=><article key={p[1]} className="market-pet"><img src={p[0]} alt={p[1]+"的模拟宠物档案插画"}/><section><i>Demo虚拟数据</i><h3>{p[1]}</h3><p>{p[2]}</p><div><span>模拟销量 {328-i*47}</span><span>模拟好评 {98-i}%</span></div><button onClick={()=>setSheet("store")}>看看档案</button></section></article>)}</div></>}
     {(marketFilter==="全部"||marketFilter==="合作店铺")&&<><div className="market-title"><span><em>合作店铺</em><h3>本期店铺推荐</h3></span><small>Demo模拟</small></div><div className="shop-list">{[["海风宠物生活馆","档案完整 · 近期上新","/assets/gulu/pet-xiaomai.png","模拟好评 98%"],["灯塔伙伴宠物屋","照护记录较完整","/assets/gulu/pet-afu.png","模拟好评 97%"]].map(s=><article key={s[0]}><img src={s[2]} alt={s[0]+"的模拟店铺封面"}/><span><i>Demo虚拟数据</i><h3>{s[0]}</h3><p>{s[1]} · {s[3]}</p></span><button onClick={()=>setSheet("store")}>进店看看</button></article>)}</div></>}
@@ -77,6 +75,7 @@ export default function Prototype(){
       <button className="previous-question" onClick={previousQuestion}><ArrowLeftIcon/>{step===0?"修改刚才的描述":"返回上一问"}</button>
       <button className="outline" onClick={()=>go("profile")}><CheckCircledIcon/>看看目前记住了什么<ArrowRightIcon/></button>
     </>}
+    <button className="chat-reset-action" onClick={()=>setSheet("reset")}>重新开始</button>
   </main>};
 
   const Profile=()=> <main className="page profile-page"><section className="profile-hero"><div><em className="tag">你的相处画像</em><h2>我目前这样理解你</h2><p className="intro">这是聊天中的暂时整理，不是给你贴标签。你随时都能修改。</p></div><img src="/assets/gulu/user-profile-companion.png" alt="你的相处画像卡通形象"/></section><div className="profile">
@@ -94,14 +93,14 @@ export default function Prototype(){
   const Empty=({expired}:{expired:boolean})=> <main className="page empty"><div className="badge">{expired?<ResetIcon/>:<ExclamationTriangleIcon/>}</div><h2>{expired?"这次聊天已经靠岸啦":retried?"已经重新连上啦":"刚刚有点走神"}</h2><p>{expired?"超过24小时没有活动，我们不会拿旧信息继续推荐。":retried?"之前的回答都还在，可以安心继续。":"这次没有生成新推荐，之前的内容都替你保留着。"}</p><button className="primary" onClick={()=>expired?resetConversation():retried?setScreen("results"):setRetried(true)}>{expired?"开始一次新聊天":retried?"回到推荐结果":"再试一次"}</button><button className="text" onClick={back}>先返回</button></main>;
 
   const chatTitle=!intake?"先认识一下你":questionOrder[step]===3?"确认一个小偏好":"了解你的日常";
-  const AppNav=()=> <nav className="nav" aria-label="主导航"><button className={activeTab==="home"?"on":""} onClick={()=>selectTab("home")}><HomeIcon/><small>首页</small></button><button className={activeTab==="pet"?"on":""} onClick={()=>selectTab("pet")}><ChatBubbleIcon/><small>选宠</small></button><button className={activeTab==="community"?"on":""} onClick={()=>selectTab("community")}><HeartIcon/><small>社区</small></button><button className={activeTab==="mine"?"on":""} onClick={()=>selectTab("mine")}><PersonIcon/><small>我的</small></button></nav>;
+  const AppNav=()=> <nav className="nav" aria-label="主导航"><button className={activeTab==="home"?"on":""} onClick={()=>selectTab("home")}><HomeIcon/><small>首页</small></button><button className={activeTab==="pet"?"on":""} onClick={()=>selectTab("pet")}><PawPrint data-icon="pet-paw"/><small>选宠</small></button><button className={activeTab==="community"?"on":""} onClick={()=>selectTab("community")}><HeartIcon/><small>社区</small></button><button className={activeTab==="mine"?"on":""} onClick={()=>selectTab("mine")}><PersonIcon/><small>我的</small></button></nav>;
   const screens:Record<Screen,()=>React.ReactNode>={home:Home,market:Market,chat:Chat,profile:Profile,allergy:Allergy,results:Results,edit:Edit,states:States,expired:()=> <Empty expired/>,error:()=> <Empty expired={false}/>};
   const Current=screens[screen];
   return <div className="gulu-shell" style={{"--gulu-status-height":device.platform==="ios"?"54px":"72px","--gulu-safe-area":device.platform==="ios"?device.geometry.safeArea.bottom+"px":"0px"} as CSSProperties}>
-    {screen==="chat"&&<header className="apphead chat-fixed-head" data-testid="chat-fixed-header"><button aria-label="返回" onClick={back}><ArrowLeftIcon/></button><strong data-testid="chat-stage-title">{chatTitle}</strong><button className="head-reset" onClick={()=>setSheet("reset")}>重新开始</button></header>}
+    {screen==="chat"&&<header className="apphead chat-fixed-head" data-testid="chat-fixed-header"><button aria-label="返回" onClick={back}><ArrowLeftIcon/></button><strong data-testid="chat-stage-title">{chatTitle}</strong><span/></header>}
     {screen!=="home"&&screen!=="chat"&&screen!=="expired"&&screen!=="error"&&<header className="apphead"><button aria-label="返回" onClick={back}><ArrowLeftIcon/></button><strong>{titles[screen]}</strong><span/></header>}
     <MobileScroll key={screen} className="paper"><Current/></MobileScroll>
-    {!['home','profile','allergy','edit','expired','error'].includes(screen)&&<AppNav/>}
+    {!['profile','allergy','edit','expired','error'].includes(screen)&&<AppNav/>}
     <BottomSheet open={sheet==="contact"} onOpenChange={v=>!v&&setSheet(null)} title="联系商家进一步了解" description="当前只是原型演示入口。"><div className="sheet"><p>Demo演示功能，暂未开放。</p><button onClick={()=>setSheet(null)}>知道啦</button></div></BottomSheet>
     <BottomSheet open={sheet==="store"} onOpenChange={v=>!v&&setSheet(null)} title="模拟宠物与店铺详情" description="这里展示的是Demo虚拟数据，不代表真实在售、销量或好评。"><div className="sheet"><p>详情页会在后续原型中继续补充。</p><button onClick={()=>setSheet(null)}>知道啦</button></div></BottomSheet>
     <BottomSheet open={sheet==="reset"} onOpenChange={v=>!v&&setSheet(null)} title="要重新认识一次吗？" description="重置后，之前的回答和推荐不会带到新会话。"><div className="sheet"><button className="danger" onClick={resetConversation}>确认重置</button><button onClick={()=>setSheet(null)}>先不重置</button></div></BottomSheet>
