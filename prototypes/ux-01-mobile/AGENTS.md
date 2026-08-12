@@ -83,3 +83,10 @@ When any text-entry control loses focus, dismiss the simulated keyboard. If the 
 - Fictional sales, positive-review, and shop-popularity metrics are allowed only when both the page and every related card visibly say Demo虚拟数据.
 - Use labels such as 模拟销量 and 模拟好评; never present the demo ordering as a real popularity ranking.
 - This prototype decision does not authorize real commerce, merchant systems, production code, or deployment.
+## 已确认的选宠交互修订（2026-08-12）
+
+- 选宠对话页的顶部栏固定在设备视口顶部，不随聊天内容滚动；左侧返回，右侧提供“重新开始”。
+- “重新开始”必须二次确认，确认后清空本轮描述、答案、画像和推荐状态，并停留在选宠初始输入页。
+- 对话页顶部标题随阶段变化：初始输入为“先认识一下你”，常规追问为“了解你的日常”，条件性补充问题为“确认一个小偏好”。
+- 相处画像不能只展示掉毛接受度；至少覆盖独处时间、陪伴投入、互动节奏、陪伴距离、活动与外出、日常照护、清洁与掉毛、愿意调整，并配真实卡通人物素材。
+- 模拟键盘的字母、删除和收起必须可操作；四个底部导航项使用同一套选中态视觉规则。

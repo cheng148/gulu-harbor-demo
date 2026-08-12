@@ -24,7 +24,8 @@ type KeyboardContextValue = {
   focusedElement: HTMLElement | null;
   setDragOffset: (offset: number) => void;
   setDragging: (dragging: boolean) => void;
-  show: (element?: HTMLElement | null) => void;
+  show: (element?: HTMLElement | null, onValueChange?: (value: string) => void) => void;
+  commitValue: (value: string) => void;
   hide: () => void;
 };
 
@@ -40,6 +41,7 @@ export function KeyboardProvider({ children }: PropsWithChildren) {
   const [dragOffset, setRawDragOffset] = useState(0);
   const [isDragging, setDragging] = useState(false);
   const [focusedElement, setFocusedElement] = useState<HTMLElement | null>(null);
+  const valueChangeRef = useRef<((value: string) => void) | null>(null);
   const fullHeight = device.geometry.keyboard.height;
   const setDragOffset = (offset: number) => {
     setRawDragOffset(Math.max(0, Math.min(fullHeight, offset)));
@@ -56,16 +58,26 @@ export function KeyboardProvider({ children }: PropsWithChildren) {
       focusedElement,
       setDragOffset,
       setDragging,
-      show: (element) => {
+      show: (element, onValueChange) => {
         setRawDragOffset(0);
         setDragging(false);
         setFocusedElement(element ?? null);
+        valueChangeRef.current = onValueChange ?? null;
         setVisible(true);
+      },
+      commitValue: (nextValue) => {
+        const element = focusedElement;
+        if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
+        const prototype = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        Object.getOwnPropertyDescriptor(prototype, "value")?.set?.call(element, nextValue);
+        valueChangeRef.current?.(nextValue);
+        element.focus();
       },
       hide: () => {
         focusedElement?.blur();
         setDragging(false);
         setFocusedElement(null);
+        valueChangeRef.current = null;
         setVisible(false);
       },
     }),
@@ -187,7 +199,10 @@ export function KeyboardInput(props: KeyboardInputProps) {
       {...inputProps}
       ref={ref}
       onFocus={(event) => {
-        keyboard.show(event.currentTarget);
+        const element = event.currentTarget;
+        keyboard.show(element, (value) => {
+          inputProps.onChange?.({ target: { ...element, value }, currentTarget: { ...element, value } } as unknown as React.ChangeEvent<HTMLInputElement>);
+        });
         inputProps.onFocus?.(event);
       }}
     />
@@ -201,7 +216,10 @@ export function KeyboardTextarea(props: TextareaHTMLAttributes<HTMLTextAreaEleme
     <textarea
       {...props}
       onFocus={(event) => {
-        keyboard.show(event.currentTarget);
+        const element = event.currentTarget;
+        keyboard.show(element, (value) => {
+          props.onChange?.({ target: { ...element, value }, currentTarget: { ...element, value } } as unknown as React.ChangeEvent<HTMLTextAreaElement>);
+        });
         props.onFocus?.(event);
       }}
     />
@@ -216,6 +234,14 @@ export function KeyboardDock() {
     ? { duration: 0 }
     : { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] as [number, number, number, number] };
 
+  const updateFocusedValue = (transform: (value: string) => string) => {
+    const element = keyboard.focusedElement;
+    if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) return;
+    keyboard.commitValue(transform(element.value));
+  };
+
+  const typeCharacter = (character: string) => updateFocusedValue((value) => value + character);
+  const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
   return (
     <motion.div
       className="keyboard-dock"
@@ -236,6 +262,32 @@ export function KeyboardDock() {
         aria-hidden="true"
         draggable={false}
       />
+      <button
+        className="keyboard-dismiss"
+        data-testid="keyboard-dismiss"
+        aria-label="收起键盘"
+        onPointerDown={(event) => event.preventDefault()}
+        onClick={keyboard.hide}
+      >
+        收起
+      </button>
+      <div className="keyboard-hit-layer" aria-label="模拟键盘">
+        {rows.map((row, rowIndex) => (
+          <div className={`keyboard-hit-row keyboard-hit-row-${rowIndex + 1}`} key={row}>
+            {[...row].map((character) => (
+              <button
+                key={character}
+                data-testid={`keyboard-key-${character}`}
+                aria-label={character}
+                onPointerDown={(event) => event.preventDefault()}
+                onClick={() => typeCharacter(character)}
+              />
+            ))}
+          </div>
+        ))}
+        <button className="keyboard-space" data-testid="keyboard-space" aria-label="空格" onPointerDown={(event) => event.preventDefault()} onClick={() => typeCharacter(" ")}/>
+        <button className="keyboard-backspace" data-testid="keyboard-backspace" aria-label="删除" onPointerDown={(event) => event.preventDefault()} onClick={() => updateFocusedValue((value) => value.slice(0, -1))}/>
+      </div>
     </motion.div>
   );
 }

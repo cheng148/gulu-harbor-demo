@@ -50,6 +50,7 @@
 .nav{height:calc(72px + var(--gulu-safe-area,34px));padding:7px 12px calc(var(--gulu-safe-area,34px) + 7px);align-items:stretch}
 .nav button{min-height:52px;justify-content:center;gap:3px;line-height:1}
 .nav button svg{width:19px;height:19px}.nav button small{display:block;line-height:1.2;font-size:10px}
+.nav button{position:relative}.nav .on{color:#244d79;font-weight:800}.nav .on svg{width:34px;height:34px;margin-top:-8px;padding:8px;border-radius:50%;box-sizing:border-box;background:#244d79;color:#fff;box-shadow:0 3px 0 rgba(211,123,91,.65)}.nav .on::after{position:absolute;bottom:0;width:24px;height:3px;border-radius:99px;background:#d37b5b;content:""}
 
 .chat-page{padding-right:18px;padding-left:18px;background:linear-gradient(180deg,rgba(239,247,246,.62),transparent 42%)}
 .chat-note{margin:0 auto 20px;padding:6px 12px;border-radius:99px;background:#fff0d2;color:#82643e;font-size:10px;text-align:center}
@@ -78,12 +79,10 @@
 
 .keyboard-dock[data-visible="false"]{visibility:hidden!important}
 
-.chat-page{padding-top:54px}
-.chat-inline-head{display:grid;height:56px;margin-bottom:14px;grid-template-columns:52px 1fr 52px;align-items:center;border-bottom:1px solid rgba(36,77,121,.12)}
-.chat-inline-head button{display:grid;width:44px;height:44px;place-items:center;border:1px solid rgba(36,77,121,.14);border-radius:50%;background:rgba(255,255,255,.78);color:#244d79}
-.chat-inline-head button svg{width:20px;height:20px}
-.chat-inline-head strong{text-align:center;color:#244d79;font-size:15px}
+.chat-page{padding-top:calc(var(--gulu-status-height,54px) + 78px)}
+.chat-fixed-head{z-index:7}.chat-fixed-head .head-reset{display:flex;width:auto;min-width:44px;padding:0 7px;align-items:center;justify-content:center;border-radius:15px;color:#244d79;font-size:11px;font-weight:800}
 .device-screen{overflow:clip}
+.profile-page{padding-right:18px;padding-left:18px}.profile-hero{display:grid;min-height:176px;padding:15px 14px 8px;grid-template-columns:1fr 132px;align-items:center;overflow:hidden;border:1px solid rgba(36,77,121,.12);border-radius:24px;background:linear-gradient(135deg,#fff7e8,#eaf4f2)}.profile-hero h2{font-size:27px}.profile-hero .intro{margin-bottom:0}.profile-hero img{width:142px;height:160px;margin-right:-16px;object-fit:cover;object-position:center;border-radius:52% 48% 42% 58% / 55% 42% 58% 45%;mix-blend-mode:multiply}.profile-page .profile{margin-top:14px}
 
 .home-approved{position:relative;height:100%;min-height:100%;padding:0;overflow:hidden;background:#fff8e9}
 .approved-home-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center}

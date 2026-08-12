@@ -738,3 +738,26 @@ p {
   border-radius: 0;
   object-fit: fill;
 }
+
+.keyboard-dismiss {
+  position: absolute;
+  z-index: 4;
+  top: 6px;
+  right: 10px;
+  min-width: 48px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(36, 77, 121, 0.88);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.keyboard-hit-layer { position: absolute; z-index: 3; inset: 42px 5px 8px; pointer-events: auto; }
+.keyboard-hit-row { position: absolute; right: 0; left: 0; display: grid; gap: 5px; height: 47px; }
+.keyboard-hit-row-1 { top: 0; grid-template-columns: repeat(10, 1fr); }
+.keyboard-hit-row-2 { top: 54px; right: 18px; left: 18px; grid-template-columns: repeat(9, 1fr); }
+.keyboard-hit-row-3 { top: 108px; right: 53px; left: 53px; grid-template-columns: repeat(7, 1fr); }
+.keyboard-hit-row button,.keyboard-space,.keyboard-backspace { border: 0; background: transparent; }
+.keyboard-space { position: absolute; right: 74px; bottom: 18px; left: 74px; height: 48px; }
+.keyboard-backspace { position: absolute; top: 108px; right: 0; width: 48px; height: 47px; }
