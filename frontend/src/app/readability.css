@@ -1,0 +1,9 @@
+/* Phone review readability floor for prototype-shell pages. */
+.app-shell [aria-label$="社区帖子"] p{font-size:11px}
+.app-shell [aria-label$="社区帖子"] small{font-size:10px}
+.app-shell [aria-label$="社区帖子"] button{font-size:10px}
+.app-shell [aria-label="我的功能"] small{font-size:10px;line-height:1.4}
+.app-shell [aria-label="我的功能"]~p{font-size:10px}
+.app-shell [aria-label="会员展示状态"] p{font-size:11px}
+.app-shell [aria-label="会员展示状态"] button{font-size:10px}
+.app-shell button[aria-label^="选择"][aria-pressed] span{font-size:10px;line-height:1.6}

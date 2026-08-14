@@ -4,6 +4,8 @@ version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi[standard-no-fastapi-cloud-cli]>=0.141.1",
+    "httpx>=0.28.1,<0.29",
+    "langgraph>=1.2.10",
 ]
 
 [dependency-groups]

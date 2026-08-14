@@ -3,87 +3,148 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
-from app.domain.catalog import Catalog, DirectionProfile, PetProfile, Species
+from app.domain.catalog import (
+    Catalog,
+    DirectionProfile,
+    MerchantProfile,
+    PetProfile,
+    Species,
+)
 from app.domain.knowledge import KnowledgeEntry
+
+DISCLOSURE = "Demo模拟数据，不代表真实在售"
+
+
+def merchant_payload() -> dict[str, object]:
+    return {
+        "merchantId": "merchant-harbor",
+        "displayName": "港湾宠物生活馆（模拟线下商家）",
+        "merchantType": "SIMULATED_OFFLINE",
+        "dataNature": "DEMO_SIMULATED",
+        "disclosure": DISCLOSURE,
+        "contactActionAvailable": False,
+    }
 
 
 def direction_payload() -> dict[str, object]:
     return {
-        "directionId": "cat-adult-mixed",
-        "name": "成年混种猫",
+        "directionId": "cat-adult-local-mix",
+        "name": "成年本地／混种短毛猫",
         "kind": "TYPE",
         "species": "CAT",
-        "tendencies": ["成年个体的行为观察通常比幼年阶段更稳定"],
-        "suitableConditions": ["希望个体信息较明确"],
-        "typicalBurdens": ["仍可能掉毛和抓挠"],
-        "healthCareRisks": ["需要常规体检和疫苗咨询"],
-        "nonGuarantees": ["类型倾向不代表具体个体"],
-        "monthlyCostCny": {"minimum": 300, "maximum": 800},
+        "tendencies": ["优先使用成年后的实际行为记录"],
+        "suitableConditions": ["愿意依据个体记录选择"],
+        "typicalBurdens": ["仍会掉毛"],
+        "healthCareRisks": ["健康资料需要进一步核实"],
+        "nonGuarantees": ["不保证统一性格或健康"],
+        "matchTraits": {
+            "sizeOptions": ["VARIABLE"],
+            "ageStages": ["ADULT"],
+            "coatAppearanceOptions": ["SHORT_HAIR"],
+            "interactionRhythms": ["VARIABLE"],
+            "companionshipDistances": ["VARIABLE"],
+            "timeDemandLevels": ["VARIABLE"],
+            "ongoingInvestmentLevels": ["MEDIUM"],
+            "disturbanceLevels": ["VARIABLE"],
+        },
+        "acquisitionCostLevel": "LOW",
+        "ongoingCareCostLevel": "MEDIUM",
         "sourceIds": ["source-cat-care"],
     }
 
 
 def pet_payload() -> dict[str, object]:
     return {
-        "petId": "pet-cat-001",
-        "nickname": "栗子",
-        "directionId": "cat-adult-mixed",
+        "petId": "pet-cat-local-01",
+        "nickname": "小麦",
+        "directionId": "cat-adult-local-mix",
+        "merchantId": "merchant-harbor",
         "species": "CAT",
         "ageStage": "ADULT",
-        "sex": "FEMALE",
-        "size": "SMALL",
-        "activityLevel": "LOW",
-        "minimumExerciseMinutes": 20,
-        "minimumCompanionHours": 2,
-        "maximumAloneHours": 8,
-        "sheddingLevel": "MEDIUM",
-        "noiseLevel": "LOW",
-        "odorLevel": "LOW",
-        "groomingLevel": "LOW",
-        "experienceRequired": "BEGINNER",
-        "monthlyCostCny": {"minimum": 350, "maximum": 700},
-        "suitableTags": ["APARTMENT", "OLDER_ADULTS"],
-        "unsuitableTags": ["TODDLERS"],
-        "observationSource": "FOSTER_NOTES",
-        "observationPeriodDays": 21,
-        "knownNotes": ["初见陌生人会躲藏"],
-        "listingType": "ADOPTION",
+        "ageDisplay": "3岁",
+        "size": "MEDIUM",
+        "appearance": "橘白短毛",
+        "observedPersonality": "安静慢热",
+        "interactionRhythm": "LOW_MEDIUM",
+        "companionshipDistance": "NEARBY",
+        "aloneTimeObservation": "短时间独处观察较稳定，完整工作日未知",
+        "dailyCareNotes": ["中等掉毛", "梳理负担较低"],
+        "acquisitionCostLevel": "LOW",
+        "ongoingCareCostLevel": "MEDIUM",
+        "knownNotes": ["换环境后可能暂时躲藏"],
+        "unknownFields": ["完整工作日独处表现"],
+        "observationSource": "SIMULATED_OFFLINE_OBSERVATION",
+        "observationPeriodDays": 28,
+        "dataNature": "DEMO_SIMULATED",
+        "listingStatus": "SIMULATED_AVAILABLE",
+        "disclosure": DISCLOSURE,
         "sourceIds": ["source-cat-care"],
-        "imageRef": "placeholder://pet-cat-001",
+        "imageRef": "placeholder://pet-cat-local-01",
     }
 
 
-def test_catalog_keeps_direction_and_specific_pet_as_two_layers() -> None:
-    direction = DirectionProfile.model_validate(direction_payload())
-    pet = PetProfile.model_validate(pet_payload())
-    catalog = Catalog(directions=(direction,), pets=(pet,))
+def make_catalog() -> Catalog:
+    return Catalog(
+        directions=(DirectionProfile.model_validate(direction_payload()),),
+        merchants=(MerchantProfile.model_validate(merchant_payload()),),
+        pets=(PetProfile.model_validate(pet_payload()),),
+    )
 
-    assert catalog.directions[0].directionId == pet.directionId
-    assert catalog.pets[0].petId == "pet-cat-001"
+
+def test_catalog_keeps_direction_pet_and_merchant_as_three_layers() -> None:
+    catalog = make_catalog()
+    assert catalog.pets[0].directionId == catalog.directions[0].directionId
+    assert catalog.pets[0].merchantId == catalog.merchants[0].merchantId
 
 
-def test_catalog_rejects_pet_linked_to_missing_direction() -> None:
-    pet = PetProfile.model_validate({**pet_payload(), "directionId": "missing"})
-
+def test_catalog_rejects_pet_linked_to_missing_merchant() -> None:
     with pytest.raises(ValidationError):
         Catalog(
             directions=(DirectionProfile.model_validate(direction_payload()),),
-            pets=(pet,),
+            merchants=(MerchantProfile.model_validate(merchant_payload()),),
+            pets=(
+                PetProfile.model_validate({**pet_payload(), "merchantId": "missing"}),
+            ),
         )
 
 
-def test_direction_and_pet_require_traceable_sources() -> None:
+def test_demo_pet_requires_simulated_nature_listing_and_exact_disclosure() -> None:
+    for field, invalid in (
+        ("dataNature", "REAL"),
+        ("listingStatus", "AVAILABLE"),
+        ("disclosure", "在售"),
+    ):
+        with pytest.raises(ValidationError):
+            PetProfile.model_validate({**pet_payload(), field: invalid})
+
+
+def test_catalog_rejects_exact_monthly_cost_fields() -> None:
+    with pytest.raises(ValidationError):
+        DirectionProfile.model_validate(
+            {**direction_payload(), "monthlyCostCny": {"minimum": 300, "maximum": 800}}
+        )
+    with pytest.raises(ValidationError):
+        PetProfile.model_validate(
+            {**pet_payload(), "monthlyCostCny": {"minimum": 300, "maximum": 800}}
+        )
+
+
+def test_direction_and_pet_require_sources_and_explicit_unknowns() -> None:
     with pytest.raises(ValidationError):
         DirectionProfile.model_validate({**direction_payload(), "sourceIds": []})
     with pytest.raises(ValidationError):
         PetProfile.model_validate({**pet_payload(), "sourceIds": []})
-
-def test_pet_requires_an_explicit_image_source_or_placeholder() -> None:
     payload = pet_payload()
-    del payload["imageRef"]
-
+    del payload["unknownFields"]
     with pytest.raises(ValidationError):
         PetProfile.model_validate(payload)
+
+
+def test_merchant_contact_is_demo_only() -> None:
+    with pytest.raises(ValidationError):
+        MerchantProfile.model_validate(
+            {**merchant_payload(), "contactActionAvailable": True}
+        )
 
 
 def test_knowledge_entry_requires_boundary_and_review_date() -> None:

@@ -1,17 +1,14 @@
 from datetime import UTC, datetime
 
 from app.domain.conflicts import detect_conflicts
-from app.domain.constraints import evaluate_session_constraints
-from app.domain.profile import (
-    AllergyLevel,
-    PetPreferenceProfile,
-    SlotStatus,
-    SlotValue,
-    YesNoUncertain,
+from app.domain.profile import PetPreferenceProfile, SlotStatus, SlotValue
+from app.domain.questions import (
+    QuestionImpact,
+    load_question_rules,
+    select_next_question,
 )
-from app.domain.questions import select_next_question
 
-NOW = datetime(2026, 8, 4, tzinfo=UTC)
+NOW = datetime(2026, 8, 9, tzinfo=UTC)
 
 
 def confirmed[T](value: T) -> SlotValue[T]:
@@ -23,66 +20,90 @@ def confirmed[T](value: T) -> SlotValue[T]:
     )
 
 
-def test_unknown_permission_and_known_permission_choose_different_next_questions() -> None:
-    uncertain = PetPreferenceProfile(petAllowed=confirmed(YesNoUncertain.UNCERTAIN))
-    allowed = PetPreferenceProfile(
-        petAllowed=confirmed(YesNoUncertain.YES),
-        dailyCompanionHours=confirmed(1.0),
-    )
+def test_question_library_excludes_rejected_default_topics() -> None:
+    rules = load_question_rules()
+    targets = {slot for rule in rules for slot in rule.targetSlots}
 
-    question_a = select_next_question(
-        uncertain,
-        evaluate_session_constraints(uncertain),
-        (),
-    )
-    question_b = select_next_question(
-        allowed,
-        evaluate_session_constraints(allowed),
-        (),
-    )
-
-    assert question_a is not None and question_a.questionId == "confirm-pet-permission"
-    assert question_b is not None and question_b.questionId != question_a.questionId
+    assert "petAllowed" not in targets
+    assert "householdConsent" not in targets
+    assert "monthlyBudgetCny" not in targets
+    assert "householdMembers" not in targets
 
 
-def test_confirmed_housing_and_allergy_are_not_asked_again() -> None:
+def test_initial_profile_starts_with_time_in_a_warm_plain_tone() -> None:
+    question = select_next_question(PetPreferenceProfile(), (), ())
+
+    assert question is not None
+    assert question.questionId == "ask-current-time"
+    assert question.targetSlots == ("currentTimeArrangement",)
+    assert question.isExtra is False
+    assert "普通工作日" in question.prompt
+
+
+def test_known_time_moves_to_relationship_instead_of_repeating() -> None:
     profile = PetPreferenceProfile(
-        petAllowed=confirmed(YesNoUncertain.YES),
-        housingType=confirmed("SMALL_APARTMENT"),
-        allergyLevel=confirmed(AllergyLevel.NONE),
+        currentTimeArrangement=confirmed("WORKDAY_ALONE_8_HOURS"),
     )
+
+    question = select_next_question(profile, (), ())
+
+    assert question is not None
+    assert question.questionId == "ask-relationship-style"
+    assert "currentTimeArrangement" not in question.targetSlots
+
+
+def test_known_time_and_relationship_move_to_daily_burden() -> None:
+    profile = PetPreferenceProfile(
+        currentTimeArrangement=confirmed("WORKDAY_ALONE_8_HOURS"),
+        interactionRhythm=confirmed("CALM"),
+        companionshipDistance=confirmed("NEARBY"),
+    )
+
+    question = select_next_question(profile, (), ())
+
+    assert question is not None
+    assert question.questionId == "ask-daily-burden"
+
+
+def test_candidate_impact_can_change_which_missing_core_question_is_more_valuable() -> None:
+    impact = {
+        "ask-current-time": QuestionImpact.BACKUP_ORDER_ONLY,
+        "ask-relationship-style": QuestionImpact.TOP_TWO_MEMBER_CHANGE,
+    }
 
     question = select_next_question(
-        profile,
-        evaluate_session_constraints(profile),
+        PetPreferenceProfile(),
         (),
+        (),
+        candidateImpact=impact,
     )
 
     assert question is not None
-    assert "housingType" not in question.targetSlots
-    assert "allergyLevel" not in question.targetSlots
-    assert len(question.quickReplies) <= 5
+    assert question.questionId == "ask-relationship-style"
 
 
-def test_conflict_interrupts_a_planned_preference_question() -> None:
+def test_important_profile_conflict_interrupts_a_core_question_once() -> None:
     profile = PetPreferenceProfile(
-        petAllowed=confirmed(YesNoUncertain.YES),
-        aloneHours=confirmed(10.0),
-        activityPreference=confirmed("HIGHLY_AFFECTIONATE"),
+        interactionRhythm=SlotValue[str](
+            value="ACTIVE",
+            status=SlotStatus.CONFLICTED,
+            sourceMessageIds=("m-1", "m-2"),
+            updatedAt=NOW,
+        )
     )
 
     question = select_next_question(profile, (), detect_conflicts(profile))
 
     assert question is not None
-    assert question.questionId == "clarify-alone-vs-companionship"
-    assert question.category == "CONFLICT"
+    assert question.questionId == "clarify-slot-interactionRhythm"
+    assert question.isExtra is True
 
 
-def test_question_selection_is_stable_and_returns_one_question() -> None:
-    profile = PetPreferenceProfile(petAllowed=confirmed(YesNoUncertain.YES))
+def test_question_selection_is_deterministic() -> None:
+    profile = PetPreferenceProfile(currentTimeArrangement=confirmed("FLEXIBLE"))
+    impact = {"ask-daily-burden": QuestionImpact.IMPORTANT_LEVEL_CHANGE}
 
-    first = select_next_question(profile, (), (), candidateImpact={"confirm-allergy": 8})
-    second = select_next_question(profile, (), (), candidateImpact={"confirm-allergy": 8})
+    first = select_next_question(profile, (), (), candidateImpact=impact)
+    second = select_next_question(profile, (), (), candidateImpact=impact)
 
     assert first == second
-    assert first is not None and first.questionId == "confirm-allergy"

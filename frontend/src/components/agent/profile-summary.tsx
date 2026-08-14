@@ -1,0 +1,12 @@
+import Image from "next/image";
+
+export type ProfileSlot = Readonly<{ status: "UNKNOWN" | "INFERRED" | "CONFIRMED" | "DECLINED" | "CONFLICTED"; value?: string | number | boolean | readonly string[] | null }>;
+const labels: Readonly<Record<string, string>> = { speciesScope: "想认识的伙伴", currentTimeArrangement: "日常时间", interactionRhythm: "互动节奏", companionshipDistance: "陪伴距离", ongoingInvestmentWillingness: "照护投入", disturbanceTolerance: "日常影响", directionAndSizePreference: "品种与体型", agePreference: "年龄阶段", coatAppearancePreference: "毛发与外形", allergySpecies: "过敏情况", absoluteBottomLines: "不能接受的事", acceptedAdjustments: "愿意调整" };
+const values: Readonly<Record<string, string>> = { "大约4到8小时": "约4～8小时", TIME_FLEXIBLE: "时间比较灵活", LOW_MEDIUM: "偏安静的互动", NEARBY: "喜欢陪在附近", MEDIUM: "可以稳定投入", CAT: "更想认识猫猫", DOG: "更想认识狗狗" };
+function valueOf(slot: ProfileSlot) { if (slot.status === "UNKNOWN" || slot.status === "DECLINED" || slot.value == null) return "还没聊到"; const list = Array.isArray(slot.value) ? slot.value : [slot.value]; return list.length ? list.map((item) => values[String(item)] ?? String(item)).join("、") : "没有特别限制"; }
+function statusOf(status: ProfileSlot["status"]) { if (status === "CONFIRMED") return "已确认"; if (status === "CONFLICTED") return "需要再聊聊"; if (status === "INFERRED") return "我先这样理解"; return "待确认"; }
+
+export function ProfileSummary({ slots, conflicts }: Readonly<{ slots: Readonly<Record<string, ProfileSlot>>; conflicts: readonly string[] }>) {
+  const visible = Object.entries(slots).filter(([name, slot]) => slot.status !== "UNKNOWN" || ["currentTimeArrangement", "interactionRhythm", "companionshipDistance", "disturbanceTolerance"].includes(name)).slice(0, 6);
+  return <section className="profile-summary" role="region" aria-label="你的相处画像"><div className="profile-summary__intro"><Image src="/assets/gulu/profile-companion.png" alt="一位正在记录生活偏好的人和猫狗伙伴插画" width={1254} height={1254}/><div><small>你的相处画像</small><h2>我目前这样理解你</h2><p>这是聊天中的暂时整理，不是给你贴标签。</p></div></div><div className="profile-summary__list">{visible.map(([name, slot]) => <div className="profile-row" key={name}><span><small>{labels[name] ?? name}</small><strong>{valueOf(slot)}</strong></span><i data-status={slot.status}>{statusOf(slot.status)}</i></div>)}</div>{conflicts.length > 0 && <p className="profile-conflict"><strong>需要再聊聊</strong>{conflicts[0]}</p>}<p className="pending-note"><strong>“待确认”是什么？</strong>只是可能影响结果、但你还没说过的信息，不代表回答错了。</p></section>;
+}

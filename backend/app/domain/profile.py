@@ -66,6 +66,27 @@ def unknown_slot[SlotType]() -> SlotValue[SlotType]:
 class PetPreferenceProfile(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True, serialize_by_alias=True)
 
+    speciesScope: SlotValue[tuple[str, ...]] = Field(default_factory=unknown_slot)
+    directionAndSizePreference: SlotValue[tuple[str, ...]] = Field(
+        default_factory=unknown_slot
+    )
+    coatAppearancePreference: SlotValue[tuple[str, ...]] = Field(
+        default_factory=unknown_slot
+    )
+    interactionRhythm: SlotValue[str] = Field(default_factory=unknown_slot)
+    companionshipDistance: SlotValue[str] = Field(default_factory=unknown_slot)
+    currentTimeArrangement: SlotValue[str] = Field(default_factory=unknown_slot)
+    ongoingInvestmentWillingness: SlotValue[str] = Field(default_factory=unknown_slot)
+    disturbanceTolerance: SlotValue[tuple[str, ...]] = Field(
+        default_factory=unknown_slot
+    )
+    allergySpecies: SlotValue[tuple[str, ...]] = Field(default_factory=unknown_slot)
+    absoluteBottomLines: SlotValue[tuple[str, ...]] = Field(default_factory=unknown_slot)
+    acceptedAdjustments: SlotValue[tuple[str, ...]] = Field(default_factory=unknown_slot)
+    volunteeredContext: SlotValue[tuple[str, ...]] = Field(default_factory=unknown_slot)
+
+    # Legacy slots remain during the approved Phase 1 migration so existing data can
+    # still be read. Revised matching and questioning use the fields above.
     speciesPreference: SlotValue[str] = Field(default_factory=unknown_slot)
     housingType: SlotValue[str] = Field(default_factory=unknown_slot)
     petAllowed: SlotValue[YesNoUncertain] = Field(default_factory=unknown_slot)

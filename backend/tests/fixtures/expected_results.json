@@ -1,0 +1,32 @@
+{
+  "complete-recommendation": {
+    "turnCount": 5,
+    "askedQuestionIds": ["ask-current-time", "ask-relationship-style", "ask-daily-burden", "confirm-species-allergy"],
+    "stageHistory": ["DISCOVERING", "DISCOVERING", "DISCOVERING", "DISCOVERING", "READY_TO_MATCH", "RECOMMENDED"],
+    "conflictCodesSeen": [],
+    "stage": "RECOMMENDED",
+    "recommendationMode": "FINAL",
+    "directionIds": ["cat-british-shorthair", "cat-adult-local-mix", "cat-ragdoll"],
+    "petIds": ["pet-cat-british-01", "pet-cat-local-01"]
+  },
+  "conflict-clarification": {
+    "turnCount": 6,
+    "askedQuestionIds": ["ask-current-time", "ask-relationship-style", "clarify-slot-interactionRhythm", "ask-daily-burden", "confirm-species-allergy"],
+    "stageHistory": ["DISCOVERING", "DISCOVERING", "RESOLVING_CONFLICT", "DISCOVERING", "DISCOVERING", "READY_TO_MATCH", "RECOMMENDED"],
+    "conflictCodesSeen": ["SLOT_VALUE_CONFLICT:interactionRhythm"],
+    "stage": "RECOMMENDED",
+    "recommendationMode": "FINAL",
+    "directionIds": ["dog-labrador-retriever", "dog-pembroke-corgi"],
+    "petIds": ["pet-dog-labrador-02", "pet-dog-corgi-02"]
+  },
+  "allergy-not-recommended": {
+    "turnCount": 5,
+    "askedQuestionIds": ["ask-current-time", "ask-relationship-style", "ask-daily-burden", "confirm-species-allergy"],
+    "stageHistory": ["DISCOVERING", "DISCOVERING", "DISCOVERING", "DISCOVERING", "READY_TO_MATCH", "NOT_RECOMMENDED"],
+    "conflictCodesSeen": [],
+    "stage": "NOT_RECOMMENDED",
+    "recommendationMode": "FINAL",
+    "directionIds": [],
+    "petIds": []
+  }
+}

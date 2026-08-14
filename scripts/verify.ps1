@@ -34,8 +34,15 @@ function Run-Step([string]$Label, [scriptblock]$Action) {
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $frontendRoot = Join-Path $projectRoot "frontend"
 $backendRoot = Join-Path $projectRoot "backend"
+$pytestTempRoot = Join-Path $backendRoot "var\pytest"
 $pnpm = (Get-Command pnpm -ErrorAction Stop).Source
 $uv = Find-UvExecutable
+
+New-Item -ItemType Directory -Path $pytestTempRoot -Force | Out-Null
+
+Run-Step "OpenAPI前端类型无漂移" {
+    & powershell -ExecutionPolicy Bypass -File (Join-Path $projectRoot "scripts\generate-api-types.ps1") -Check
+}
 
 Run-Step "前端代码规范" { & $pnpm --dir $frontendRoot lint }
 Run-Step "前端类型" { & $pnpm --dir $frontendRoot typecheck }
@@ -48,10 +55,12 @@ try {
     Run-Step "后端依赖锁" { & $uv sync --all-groups --frozen }
     Run-Step "后端代码规范" { & $uv run ruff check . }
     Run-Step "后端类型" { & $uv run mypy app tests }
-    Run-Step "后端测试与覆盖率" { & $uv run pytest --cov=app --cov-report=term-missing }
+    Run-Step "后端测试与覆盖率" {
+        & $uv run pytest --basetemp $pytestTempRoot --cov=app --cov-report=term-missing
+    }
 }
 finally {
     Pop-Location
 }
 
-Write-Host "`nPhase 0全部检查通过。OpenAPI、Mock端到端和固定评测将在对应获批阶段加入。"
+Write-Host "`nT32和当前已实现范围的检查全部通过。固定评测和DeepSeek接入将在对应获批阶段加入。"

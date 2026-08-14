@@ -1,0 +1,441 @@
+[
+    {
+        "directionId":  "cat-adult-local-mix",
+        "name":  "成年本地／混种短毛猫",
+        "kind":  "TYPE",
+        "species":  "CAT",
+        "tendencies":  [
+                           "优先使用成年后的实际行为记录"
+                       ],
+        "suitableConditions":  [
+                                   "愿意依据个体记录而非血统选择"
+                               ],
+        "typicalBurdens":  [
+                               "短毛仍会掉毛，互动和独处表现按档案"
+                           ],
+        "healthCareRisks":  [
+                                "健康资料需要进一步核实"
+                            ],
+        "nonGuarantees":  [
+                              "不保证独立、好养、健康或统一性格"
+                          ],
+        "acquisitionCostLevel":  "LOW",
+        "ongoingCareCostLevel":  "MEDIUM",
+        "sourceIds":  [
+                          "bluecross-finding-right-pet"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "VARIABLE"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "VARIABLE"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "SHORT_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "VARIABLE"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "VARIABLE"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "MEDIUM"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "VARIABLE"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "cat-british-shorthair",
+        "name":  "英国短毛猫",
+        "kind":  "BREED",
+        "species":  "CAT",
+        "tendencies":  [
+                           "中到偏大体型，节奏较稳，活动量偏低至中等"
+                       ],
+        "suitableConditions":  [
+                                   "能安排游戏和体重管理"
+                               ],
+        "typicalBurdens":  [
+                               "浓密短毛会掉毛"
+                           ],
+        "healthCareRisks":  [
+                                "需要核实健康资料"
+                            ],
+        "nonGuarantees":  [
+                              "不保证一定安静、独立或喜欢被抱"
+                          ],
+        "acquisitionCostLevel":  "HIGH",
+        "ongoingCareCostLevel":  "MEDIUM",
+        "sourceIds":  [
+                          "tica-british-shorthair"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "MEDIUM",
+                                                "MEDIUM_LARGE"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "SHEDDING_MEDIUM_HIGH",
+                                                      "NOISE_LOW"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "SHORT_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "NEARBY"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "LOW_MEDIUM"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "MEDIUM"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "LOW_MEDIUM",
+                                                       "MEDIUM"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "cat-american-shorthair",
+        "name":  "美国短毛猫",
+        "kind":  "BREED",
+        "species":  "CAT",
+        "tendencies":  [
+                           "中到偏大、结实，互动与独立较均衡"
+                       ],
+        "suitableConditions":  [
+                                   "能提供规律互动和玩耍"
+                               ],
+        "typicalBurdens":  [
+                               "季节性掉毛"
+                           ],
+        "healthCareRisks":  [
+                                "需要常规健康管理"
+                            ],
+        "nonGuarantees":  [
+                              "不保证一定是膝上猫或所有个体都外向"
+                          ],
+        "acquisitionCostLevel":  "MEDIUM_HIGH",
+        "ongoingCareCostLevel":  "MEDIUM",
+        "sourceIds":  [
+                          "tica-american-shorthair"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "MEDIUM",
+                                                "MEDIUM_LARGE"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "SHEDDING_MEDIUM",
+                                                      "NOISE_LOW"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "SHORT_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "NEARBY",
+                                                           "SAME_ROOM",
+                                                           "ACTIVE_APPROACH"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "MEDIUM"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "MEDIUM"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "MEDIUM",
+                                                       "MEDIUM_HIGH"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "cat-ragdoll",
+        "name":  "布偶猫",
+        "kind":  "BREED",
+        "species":  "CAT",
+        "tendencies":  [
+                           "大型、半长毛，常见群体倾向温和亲人"
+                       ],
+        "suitableConditions":  [
+                                   "能接受规律互动、梳理和体重管理"
+                               ],
+        "typicalBurdens":  [
+                               "半长毛需要规律梳理"
+                           ],
+        "healthCareRisks":  [
+                                "需要关注繁育健康资料"
+                            ],
+        "nonGuarantees":  [
+                              "不保证软抱、黏人、安静或健康"
+                          ],
+        "acquisitionCostLevel":  "HIGH",
+        "ongoingCareCostLevel":  "MEDIUM_HIGH",
+        "sourceIds":  [
+                          "tica-ragdoll"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "MEDIUM_LARGE",
+                                                "LARGE"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "SHEDDING_MEDIUM_HIGH",
+                                                      "NOISE_LOW"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "SEMI_LONG_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "CLOSE",
+                                                           "NEARBY"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "MEDIUM"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "MEDIUM_HIGH"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "LOW_MEDIUM",
+                                                       "MEDIUM"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "dog-adult-local-mix",
+        "name":  "成年本地犬／混种犬（按个体档案匹配）",
+        "kind":  "TYPE",
+        "species":  "DOG",
+        "tendencies":  [
+                           "以成年体型和实际观察为主"
+                       ],
+        "suitableConditions":  [
+                                   "愿意依据个体行为记录选择"
+                               ],
+        "typicalBurdens":  [
+                               "活动、叫声、掉毛、训练和独处按档案"
+                           ],
+        "healthCareRisks":  [
+                                "健康历史需要进一步核实"
+                            ],
+        "nonGuarantees":  [
+                              "不保证忠诚、聪明、好养或统一性格"
+                          ],
+        "acquisitionCostLevel":  "LOW",
+        "ongoingCareCostLevel":  "MEDIUM",
+        "sourceIds":  [
+                          "bluecross-choosing-right-dog"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "VARIABLE"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "VARIABLE"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "VARIABLE"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "VARIABLE"
+                                                       ],
+                            "ageStages":  [
+                                              "ADULT"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "VARIABLE"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "MEDIUM"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "VARIABLE"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "dog-toy-mini-poodle",
+        "name":  "玩具型／迷你型贵宾犬",
+        "kind":  "BREED",
+        "species":  "DOG",
+        "tendencies":  [
+                           "小型、高互动、爱学习"
+                       ],
+        "suitableConditions":  [
+                                   "能承担活动、训练和高频毛发护理"
+                               ],
+        "typicalBurdens":  [
+                               "美容投入较高"
+                           ],
+        "healthCareRisks":  [
+                                "需要核实健康资料"
+                            ],
+        "nonGuarantees":  [
+                              "不保证不掉毛、不过敏或无需运动"
+                          ],
+        "acquisitionCostLevel":  "HIGH",
+        "ongoingCareCostLevel":  "HIGH",
+        "sourceIds":  [
+                          "rkc-toy-poodle"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "TOY_SMALL",
+                                                "MINI_SMALL_MEDIUM"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "SHEDDING_LOW",
+                                                      "NOISE_MEDIUM"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "CURLY_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "CLOSE",
+                                                           "FOLLOWING"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "MEDIUM_HIGH"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "HIGH"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "MEDIUM",
+                                                       "MEDIUM_HIGH",
+                                                       "HIGH"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "dog-pembroke-corgi",
+        "name":  "彭布罗克威尔士柯基犬",
+        "kind":  "BREED",
+        "species":  "DOG",
+        "tendencies":  [
+                           "中小型、活泼亲人、需要参与感"
+                       ],
+        "suitableConditions":  [
+                                   "能安排活动和训练"
+                               ],
+        "typicalBurdens":  [
+                               "双层毛掉毛明显，警觉叫声可能突出"
+                           ],
+        "healthCareRisks":  [
+                                "需要核实健康资料"
+                            ],
+        "nonGuarantees":  [
+                              "不保证腿短所以运动少、安静或听话"
+                          ],
+        "acquisitionCostLevel":  "HIGH",
+        "ongoingCareCostLevel":  "MEDIUM_HIGH",
+        "sourceIds":  [
+                          "rkc-pembroke-corgi"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "MEDIUM"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "SHEDDING_HIGH",
+                                                      "NOISE_MEDIUM"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "SHORT_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "FOLLOWING",
+                                                           "NEARBY"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "HIGH"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "MEDIUM_HIGH"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "MEDIUM",
+                                                       "HIGH"
+                                                   ]
+                        }
+    },
+    {
+        "directionId":  "dog-labrador-retriever",
+        "name":  "拉布拉多寻回犬",
+        "kind":  "BREED",
+        "species":  "DOG",
+        "tendencies":  [
+                           "大型、热情亲人、活动与互动需求高"
+                       ],
+        "suitableConditions":  [
+                                   "能承担规律运动和训练"
+                               ],
+        "typicalBurdens":  [
+                               "力量、掉毛、清洁、食量和大型犬支出明显"
+                           ],
+        "healthCareRisks":  [
+                                "需要核实健康资料"
+                            ],
+        "nonGuarantees":  [
+                              "不保证温顺所以无需训练或短毛所以少掉毛"
+                          ],
+        "acquisitionCostLevel":  "HIGH",
+        "ongoingCareCostLevel":  "HIGH",
+        "sourceIds":  [
+                          "rkc-labrador-retriever"
+                      ],
+        "matchTraits":  {
+                            "sizeOptions":  [
+                                                "LARGE"
+                                            ],
+                            "disturbanceLevels":  [
+                                                      "SHEDDING_HIGH",
+                                                      "NOISE_LOW"
+                                                  ],
+                            "coatAppearanceOptions":  [
+                                                          "SHORT_HAIR"
+                                                      ],
+                            "companionshipDistances":  [
+                                                           "FOLLOWING",
+                                                           "NEARBY"
+                                                       ],
+                            "ageStages":  [
+                                              "ANY"
+                                          ],
+                            "timeDemandLevels":  [
+                                                     "HIGH"
+                                                 ],
+                            "ongoingInvestmentLevels":  [
+                                                            "HIGH"
+                                                        ],
+                            "interactionRhythms":  [
+                                                       "MEDIUM",
+                                                       "HIGH"
+                                                   ]
+                        }
+    }
+]

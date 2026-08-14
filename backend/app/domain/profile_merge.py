@@ -13,6 +13,18 @@ from app.domain.profile import (
 )
 
 type ProfileSlotName = Literal[
+    "speciesScope",
+    "directionAndSizePreference",
+    "coatAppearancePreference",
+    "interactionRhythm",
+    "companionshipDistance",
+    "currentTimeArrangement",
+    "ongoingInvestmentWillingness",
+    "disturbanceTolerance",
+    "allergySpecies",
+    "absoluteBottomLines",
+    "acceptedAdjustments",
+    "volunteeredContext",
     "speciesPreference",
     "housingType",
     "petAllowed",
@@ -109,12 +121,19 @@ def merge_profile(
     for change in delta.changes:
         current = cast(SlotValue[ProfileValue], getattr(profile, change.slotName))
 
-        if delta.sourceMessageId in current.sourceMessageIds and change.value == current.value:
+        if (
+            delta.sourceMessageId in current.sourceMessageIds
+            and change.value == current.value
+        ):
             continue
-        if current.status is SlotStatus.CONFIRMED and not explicit_edit:
+        if current.status is SlotStatus.CONFIRMED:
             if change.status is SlotStatus.INFERRED:
                 continue
-            if change.value != current.value and change.value is not None:
+            if (
+                not explicit_edit
+                and change.value != current.value
+                and change.value is not None
+            ):
                 conflicts.append(
                     ProfileConflict(
                         slotName=change.slotName,
@@ -125,7 +144,13 @@ def merge_profile(
                     )
                 )
                 data[change.slotName] = current.model_copy(
-                    update={"status": SlotStatus.CONFLICTED}
+                    update={
+                        "status": SlotStatus.CONFLICTED,
+                        "sourceMessageIds": _with_source(
+                            current.sourceMessageIds, delta.sourceMessageId
+                        ),
+                        "updatedAt": updated_at,
+                    }
                 )
                 continue
 
@@ -133,7 +158,9 @@ def merge_profile(
             value=change.value,
             status=change.status,
             constraintStrength=change.constraintStrength,
-            sourceMessageIds=_with_source(current.sourceMessageIds, delta.sourceMessageId),
+            sourceMessageIds=_with_source(
+                current.sourceMessageIds, delta.sourceMessageId
+            ),
             updatedAt=updated_at,
         )
 

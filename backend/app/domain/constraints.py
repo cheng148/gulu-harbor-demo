@@ -4,13 +4,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domain.profile import (
-    AllergyLevel,
-    ConstraintStrength,
-    PetPreferenceProfile,
-    SlotStatus,
-    YesNoUncertain,
-)
+from app.domain.profile import PetPreferenceProfile, SlotStatus
 
 
 class ConstraintOutcome(StrEnum):
@@ -33,91 +27,58 @@ class CandidateRequirements(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     candidateId: str
+    species: str = "DOG"
     minimumExerciseMinutes: int = Field(ge=0)
     minimumMonthlyCostCny: int = Field(ge=0)
     minimumCompanionHours: float = Field(default=0, ge=0, le=24)
     maximumAloneHours: float = Field(default=24, ge=0, le=24)
+    size: str = "MEDIUM"
+    sheddingLevel: str = "MEDIUM"
+    noiseLevel: str = "MEDIUM"
+    odorLevel: str = "MEDIUM"
+    groomingLevel: str = "MEDIUM"
+    unsuitableTags: tuple[str, ...] = ()
+    listingType: str = "ADOPTION"
 
 
 def evaluate_session_constraints(
     profile: PetPreferenceProfile,
 ) -> tuple[ConstraintDecision, ...]:
-    decisions: list[ConstraintDecision] = []
+    del profile
+    # Housing, household, budget, and care context are not mandatory gates in
+    # the revised product. Species allergy and explicit bottom lines are
+    # evaluated against each candidate, where their actual impact is known.
+    return ()
 
-    if profile.petAllowed.status not in {SlotStatus.CONFIRMED, SlotStatus.DECLINED} or (
-        profile.petAllowed.value is YesNoUncertain.UNCERTAIN
-    ):
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.CLARIFY,
-                code="PET_PERMISSION_UNKNOWN",
-                reason="需要先确认住房或管理规定是否允许养宠。",
-                affectedSlots=("petAllowed",),
-            )
-        )
-    elif profile.petAllowed.value is YesNoUncertain.NO:
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.NOT_RECOMMENDED,
-                code="PET_NOT_ALLOWED",
-                reason="当前住房明确禁养，暂不建议进入选宠或购买流程。",
-                affectedSlots=("petAllowed",),
-            )
-        )
 
-    if profile.householdConsent.value is YesNoUncertain.NO:
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.NOT_RECOMMENDED,
-                code="HOUSEHOLD_OPPOSED",
-                reason="共同居住者明确反对，需要先取得一致。",
-                affectedSlots=("householdConsent",),
-            )
-        )
+_LEVEL_RANK = {"LOW": 0, "MEDIUM": 1, "HIGH": 2}
 
-    if profile.allergyLevel.value is AllergyLevel.SEVERE:
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.BLOCK_FINAL,
-                code="SEVERE_ALLERGY_UNASSESSED",
-                reason="严重过敏需要先由专业人员评估，不能承诺任何品种绝对不过敏。",
-                affectedSlots=("allergyLevel",),
-            )
-        )
-    elif profile.allergyLevel.value in {AllergyLevel.MILD, AllergyLevel.UNCERTAIN}:
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.CLARIFY,
-                code="ALLERGY_NEEDS_CLARIFICATION",
-                reason="需要了解实际接触反应，并建议咨询专业人员。",
-                affectedSlots=("allergyLevel",),
-            )
-        )
 
-    if profile.stableCarePlan.status is SlotStatus.CONFIRMED and not profile.stableCarePlan.value:
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.NOT_RECOMMENDED,
-                code="NO_STABLE_CARE_PLAN",
-                reason="当前没有稳定照护人或安排，暂不建议养宠。",
-                affectedSlots=("stableCarePlan",),
-            )
-        )
+def _violates_bottom_line(line: str, candidate: CandidateRequirements) -> bool:
+    key, separator, value = line.partition(":")
+    if not separator or not value:
+        return False
 
-    if (
-        profile.emergencyBudgetReady.status is SlotStatus.CONFIRMED
-        and not profile.emergencyBudgetReady.value
-    ):
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.BLOCK_FINAL,
-                code="EMERGENCY_BUDGET_NOT_READY",
-                reason="可以给暂定方向，但正式建议前应准备突发医疗方案。",
-                affectedSlots=("emergencyBudgetReady",),
-            )
+    maximum_levels = {
+        "SHEDDING_MAX": candidate.sheddingLevel,
+        "NOISE_MAX": candidate.noiseLevel,
+        "ODOR_MAX": candidate.odorLevel,
+        "GROOMING_MAX": candidate.groomingLevel,
+    }
+    if key in maximum_levels:
+        candidate_level = maximum_levels[key]
+        return (
+            value in _LEVEL_RANK
+            and candidate_level in _LEVEL_RANK
+            and _LEVEL_RANK[candidate_level] > _LEVEL_RANK[value]
         )
-
-    return tuple(decisions)
+    if key == "SIZE_NOT":
+        return candidate.size == value
+    if key == "SOURCE_ONLY":
+        return candidate.listingType != value
+    if key == "UNSUITABLE_TAG":
+        return value in candidate.unsuitableTags
+    return False
 
 
 def evaluate_candidate_constraints(
@@ -126,59 +87,32 @@ def evaluate_candidate_constraints(
 ) -> tuple[ConstraintDecision, ...]:
     decisions: list[ConstraintDecision] = []
 
-    exercise = profile.dailyExerciseMinutes
-    if exercise.status is SlotStatus.CONFIRMED and (
-        exercise.value is not None and exercise.value < candidate.minimumExerciseMinutes
-    ):
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.EXCLUDE_CANDIDATE,
-                code="EXERCISE_INSUFFICIENT",
-                reason="候选的最低运动需求超过用户可稳定提供的时间。",
-                affectedSlots=("dailyExerciseMinutes",),
-            )
-        )
-
-    budget = profile.monthlyBudgetCny
+    allergy = profile.allergySpecies
     if (
-        budget.status is SlotStatus.CONFIRMED
-        and budget.constraintStrength is ConstraintStrength.HARD
-        and budget.value is not None
-        and budget.value < candidate.minimumMonthlyCostCny
+        allergy.status is SlotStatus.CONFIRMED
+        and allergy.value is not None
+        and candidate.species in allergy.value
     ):
         decisions.append(
             ConstraintDecision(
                 outcome=ConstraintOutcome.EXCLUDE_CANDIDATE,
-                code="BUDGET_TOO_LOW",
-                reason="候选的月度基础成本下限超过已确认的硬预算。",
-                affectedSlots=("monthlyBudgetCny",),
+                code="SPECIES_ALLERGY",
+                reason=f"用户已确认对{candidate.species}物种过敏。",
+                affectedSlots=("allergySpecies",),
             )
         )
 
-    companion = profile.dailyCompanionHours
-    if companion.status is SlotStatus.CONFIRMED and (
-        companion.value is not None and companion.value < candidate.minimumCompanionHours
-    ):
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.EXCLUDE_CANDIDATE,
-                code="COMPANIONSHIP_INSUFFICIENT",
-                reason="候选需要的稳定陪伴时间超过用户可提供值。",
-                affectedSlots=("dailyCompanionHours",),
-            )
-        )
-
-    alone = profile.aloneHours
-    if alone.status is SlotStatus.CONFIRMED and (
-        alone.value is not None and alone.value > candidate.maximumAloneHours
-    ):
-        decisions.append(
-            ConstraintDecision(
-                outcome=ConstraintOutcome.EXCLUDE_CANDIDATE,
-                code="ALONE_TIME_TOO_LONG",
-                reason="候选可承受的独处时间短于用户的稳定日常安排。",
-                affectedSlots=("aloneHours",),
-            )
-        )
+    bottom_lines = profile.absoluteBottomLines
+    if bottom_lines.status is SlotStatus.CONFIRMED and bottom_lines.value is not None:
+        for line in bottom_lines.value:
+            if _violates_bottom_line(line, candidate):
+                decisions.append(
+                    ConstraintDecision(
+                        outcome=ConstraintOutcome.EXCLUDE_CANDIDATE,
+                        code="ABSOLUTE_BOTTOM_LINE",
+                        reason="候选违反用户明确说出的绝对底线。",
+                        affectedSlots=("absoluteBottomLines",),
+                    )
+                )
 
     return tuple(decisions)

@@ -5,6 +5,7 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.domain.matching import PublicRecommendation
 from app.domain.profile import PetPreferenceProfile
 
 
@@ -41,6 +42,16 @@ class MessageRecord(BaseModel):
     createdAt: datetime
 
 
+class AcceptedAdjustment(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    slotName: str = Field(min_length=1)
+    sourceMessageId: str = Field(min_length=1)
+    acceptedAt: datetime
+    scoreRatio: float = Field(default=0.75, ge=0.75, le=0.75)
+    condition: str = Field(default="用户明确愿意为这一项调整", min_length=1)
+
+
 class ConversationState(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
@@ -55,11 +66,15 @@ class ConversationState(BaseModel):
     activeBlockers: tuple[str, ...] = ()
     conflicts: tuple[str, ...] = ()
     questionHistory: tuple[str, ...] = ()
+    coreQuestionCount: int = Field(default=0, ge=0, le=3)
+    extraQuestionUsed: bool = False
+    importantUnknowns: tuple[str, ...] = ()
+    acceptedAdjustments: tuple[AcceptedAdjustment, ...] = ()
     consecutiveUnclearTurns: int = Field(default=0, ge=0)
     retrievedSourceIds: tuple[str, ...] = ()
     directionCandidates: tuple[str, ...] = ()
     petCandidateIds: tuple[str, ...] = ()
-    recommendations: None = None
+    recommendations: PublicRecommendation | None = None
     safetyFlags: tuple[str, ...] = ()
     createdAt: datetime
     lastActiveAt: datetime

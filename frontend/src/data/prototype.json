@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "isSimulated": true,
+    "disclosure": "Demo虚拟数据，不代表真实交易、评价或在售状态"
+  },
+  "home": {
+    "pets": [
+      { "id": "xiaomai", "name": "小麦", "kind": "cat", "breed": "成年本地短毛猫", "note": "安静亲人，喜欢在身边陪着", "views": 1234, "interested": 86 },
+      { "id": "afu", "name": "阿福", "kind": "dog", "breed": "成年本地混种犬", "note": "热情开朗，期待稳定的陪伴", "views": 1098, "interested": 72 },
+      { "id": "naigai", "name": "奶盖", "kind": "cat", "breed": "布偶猫", "note": "温和黏人，需要耐心梳毛", "views": 968, "interested": 64 },
+      { "id": "tudou", "name": "土豆", "kind": "dog", "breed": "柯基犬", "note": "活泼好动，喜欢一起出门", "views": 821, "interested": 57 }
+    ],
+    "breeds": [
+      { "name": "布偶猫", "kind": "cat", "image": "/assets/gulu/pet-naigai.png", "sold": 234, "praise": 96, "available": 12 },
+      { "name": "英国短毛猫", "kind": "cat", "image": "/assets/gulu/pet-xiaomai.png", "sold": 198, "praise": 95, "available": 9 },
+      { "name": "柯基犬", "kind": "dog", "image": "/assets/gulu/pet-tudou.png", "sold": 176, "praise": 94, "available": 8 },
+      { "name": "拉布拉多", "kind": "dog", "image": "/assets/gulu/pet-afu.png", "sold": 151, "praise": 97, "available": 6 }
+    ],
+    "shops": [
+      { "name": "海风宠物生活馆", "note": "档案完整 · 近期上新", "image": "/assets/gulu/pet-xiaomai.png", "sold": 328, "praise": 98 },
+      { "name": "灯塔伙伴宠物屋", "note": "照护记录较完整", "image": "/assets/gulu/pet-afu.png", "sold": 281, "praise": 97 }
+    ]
+  },
+  "market": {
+    "categories": [
+      { "id": "ragdoll", "name": "布偶猫", "kind": "cat", "image": "/assets/gulu/pet-naigai.png", "sold": 234, "praise": 96, "available": 12 },
+      { "id": "british-shorthair", "name": "英国短毛猫", "kind": "cat", "image": "/assets/gulu/pet-xiaomai.png", "sold": 198, "praise": 95, "available": 9 },
+      { "id": "corgi", "name": "柯基犬", "kind": "dog", "image": "/assets/gulu/pet-tudou.png", "sold": 176, "praise": 94, "available": 8 },
+      { "id": "labrador", "name": "拉布拉多犬", "kind": "dog", "image": "/assets/gulu/pet-afu.png", "sold": 151, "praise": 97, "available": 6 }
+    ],
+    "pets": [
+      { "id": "naigai", "categoryId": "ragdoll", "image": "/assets/gulu/pet-naigai.png", "name": "奶盖", "kind": "cat", "breed": "布偶猫", "age": "1岁", "size": "中等体型", "merchant": "海风宠物生活馆", "note": "温和黏人，需要耐心梳毛", "views": 968 },
+      { "id": "yunduo", "categoryId": "ragdoll", "image": "/assets/gulu/pet-naigai.png", "name": "云朵", "kind": "cat", "breed": "布偶猫", "age": "10个月", "size": "中等体型", "merchant": "灯塔伙伴宠物屋", "note": "喜欢安静观察，也愿意靠近熟悉的人", "views": 742 },
+      { "id": "xiaomai", "categoryId": "british-shorthair", "image": "/assets/gulu/pet-xiaomai.png", "name": "小麦", "kind": "cat", "breed": "英国短毛猫", "age": "2岁", "size": "中等体型", "merchant": "海风宠物生活馆", "note": "安静亲人，喜欢在身边陪着", "views": 1234 },
+      { "id": "zhima", "categoryId": "british-shorthair", "image": "/assets/gulu/pet-xiaomai.png", "name": "芝麻", "kind": "cat", "breed": "英国短毛猫", "age": "1岁半", "size": "中等体型", "merchant": "灯塔伙伴宠物屋", "note": "独处时比较安稳，熟悉后会主动互动", "views": 689 },
+      { "id": "tudou", "categoryId": "corgi", "image": "/assets/gulu/pet-tudou.png", "name": "土豆", "kind": "dog", "breed": "柯基犬", "age": "2岁", "size": "小型犬", "merchant": "灯塔伙伴宠物屋", "note": "活泼好动，喜欢一起出门", "views": 821 },
+      { "id": "lizi", "categoryId": "corgi", "image": "/assets/gulu/pet-tudou.png", "name": "栗子", "kind": "dog", "breed": "柯基犬", "age": "1岁", "size": "小型犬", "merchant": "海风宠物生活馆", "note": "对玩具很有兴趣，需要规律活动", "views": 653 },
+      { "id": "afu", "categoryId": "labrador", "image": "/assets/gulu/pet-afu.png", "name": "阿福", "kind": "dog", "breed": "拉布拉多犬", "age": "3岁", "size": "大型犬", "merchant": "灯塔伙伴宠物屋", "note": "热情开朗，期待稳定的陪伴", "views": 1098 },
+      { "id": "kele", "categoryId": "labrador", "image": "/assets/gulu/pet-afu.png", "name": "可乐", "kind": "dog", "breed": "拉布拉多犬", "age": "2岁", "size": "大型犬", "merchant": "海风宠物生活馆", "note": "亲人爱互动，需要充足的活动时间", "views": 777 }
+    ]
+  },
+  "supplies": {
+    "items": [
+      { "id": "supply-food-1", "name": "海港鲜肉主食包", "category": "food", "categoryLabel": "日常吃喝", "note": "猫狗分款的模拟日常主食", "sold": 328, "praise": 97 },
+      { "id": "supply-toy-1", "name": "灯塔耐咬互动球", "category": "toys", "categoryLabel": "玩具互动", "note": "适合一起玩耍的模拟用品", "sold": 246, "praise": 96 },
+      { "id": "supply-care-1", "name": "温和免洗清洁手套", "category": "care", "categoryLabel": "清洁护理", "note": "外出回家后的模拟清洁用品", "sold": 219, "praise": 98 },
+      { "id": "supply-travel-1", "name": "轻便透气外出包", "category": "travel", "categoryLabel": "安心出行", "note": "短途出行使用的模拟便携包", "sold": 174, "praise": 95 }
+    ]
+  }
+}

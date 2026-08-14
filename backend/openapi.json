@@ -1,0 +1,1470 @@
+{
+  "components": {
+    "schemas": {
+      "ConstraintStrength": {
+        "enum": [
+          "HARD",
+          "PREFERENCE",
+          "UNSET"
+        ],
+        "title": "ConstraintStrength",
+        "type": "string"
+      },
+      "ConversationStage": {
+        "enum": [
+          "NEW",
+          "DISCOVERING",
+          "RESOLVING_CONFLICT",
+          "READY_TO_MATCH",
+          "MATCHING",
+          "RECOMMENDED",
+          "NOT_RECOMMENDED",
+          "COMPLETED",
+          "EXPIRED",
+          "RESET"
+        ],
+        "title": "ConversationStage",
+        "type": "string"
+      },
+      "CostLevel": {
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "MEDIUM_HIGH",
+          "HIGH"
+        ],
+        "title": "CostLevel",
+        "type": "string"
+      },
+      "CreateConversationData": {
+        "additionalProperties": false,
+        "properties": {
+          "assistantMessage": {
+            "$ref": "#/components/schemas/PublicMessage"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/PublicConversationSummary"
+          },
+          "nextQuestion": {
+            "$ref": "#/components/schemas/PublicQuestion"
+          }
+        },
+        "required": [
+          "conversation",
+          "assistantMessage",
+          "nextQuestion"
+        ],
+        "title": "CreateConversationData",
+        "type": "object"
+      },
+      "CreateConversationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "clientLocale": {
+            "const": "zh-CN",
+            "default": "zh-CN",
+            "title": "Clientlocale",
+            "type": "string"
+          }
+        },
+        "title": "CreateConversationRequest",
+        "type": "object"
+      },
+      "CreateConversationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CreateConversationData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "CreateConversationResponse",
+        "type": "object"
+      },
+      "DataNature": {
+        "enum": [
+          "DEMO_SIMULATED"
+        ],
+        "title": "DataNature",
+        "type": "string"
+      },
+      "DirectionKind": {
+        "enum": [
+          "BREED",
+          "TYPE"
+        ],
+        "title": "DirectionKind",
+        "type": "string"
+      },
+      "GetConversationData": {
+        "additionalProperties": false,
+        "properties": {
+          "conversation": {
+            "$ref": "#/components/schemas/PublicConversationSummary"
+          },
+          "currentQuestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicQuestion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/PublicMessage"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicRecommendation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "conversation",
+          "messages",
+          "currentQuestion",
+          "recommendation"
+        ],
+        "title": "GetConversationData",
+        "type": "object"
+      },
+      "GetConversationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/GetConversationData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "GetConversationResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ListingStatus": {
+        "enum": [
+          "SIMULATED_AVAILABLE"
+        ],
+        "title": "ListingStatus",
+        "type": "string"
+      },
+      "MatchLevel": {
+        "enum": [
+          "HIGH",
+          "MEDIUM",
+          "CAUTION"
+        ],
+        "title": "MatchLevel",
+        "type": "string"
+      },
+      "PatchProfileRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseRevision": {
+            "minimum": 0.0,
+            "title": "Baserevision",
+            "type": "integer"
+          },
+          "updates": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfileUpdate"
+            },
+            "minProperties": 1,
+            "propertyNames": {
+              "$ref": "#/components/schemas/PublicProfileSlotName"
+            },
+            "title": "Updates",
+            "type": "object"
+          }
+        },
+        "required": [
+          "baseRevision",
+          "updates"
+        ],
+        "title": "PatchProfileRequest",
+        "type": "object"
+      },
+      "ProfileUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "constraintStrength": {
+            "$ref": "#/components/schemas/ConstraintStrength",
+            "default": "PREFERENCE"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PublicProfileValue"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "ProfileUpdate",
+        "type": "object"
+      },
+      "PublicContactAction": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "default": false,
+            "title": "Available",
+            "type": "boolean"
+          },
+          "label": {
+            "default": "联系商家进一步了解",
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "default": "DEMO_CONTACT_MERCHANT",
+            "title": "Type",
+            "type": "string"
+          },
+          "unavailableMessage": {
+            "default": "Demo演示功能，暂未开放。",
+            "title": "Unavailablemessage",
+            "type": "string"
+          }
+        },
+        "title": "PublicContactAction",
+        "type": "object"
+      },
+      "PublicConversationSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "activeBlockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Activeblockers",
+            "type": "array"
+          },
+          "conflicts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Conflicts",
+            "type": "array"
+          },
+          "conversationId": {
+            "minLength": 1,
+            "title": "Conversationid",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "title": "Expiresat",
+            "type": "string"
+          },
+          "lastActiveAt": {
+            "format": "date-time",
+            "title": "Lastactiveat",
+            "type": "string"
+          },
+          "missingCriticalSlots": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missingcriticalslots",
+            "type": "array"
+          },
+          "profileSummary": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PublicSlotSummary"
+            },
+            "title": "Profilesummary",
+            "type": "object"
+          },
+          "recommendationMode": {
+            "$ref": "#/components/schemas/RecommendationMode"
+          },
+          "revision": {
+            "minimum": 0.0,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/ConversationStage"
+          }
+        },
+        "required": [
+          "conversationId",
+          "revision",
+          "stage",
+          "recommendationMode",
+          "profileSummary",
+          "missingCriticalSlots",
+          "activeBlockers",
+          "conflicts",
+          "lastActiveAt",
+          "expiresAt"
+        ],
+        "title": "PublicConversationSummary",
+        "type": "object"
+      },
+      "PublicDirectionResult": {
+        "additionalProperties": false,
+        "properties": {
+          "acquisitionCostLevel": {
+            "$ref": "#/components/schemas/CostLevel"
+          },
+          "directionId": {
+            "title": "Directionid",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PublicEvidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "evidenceNote": {
+            "title": "Evidencenote",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DirectionKind"
+          },
+          "matchLevel": {
+            "$ref": "#/components/schemas/MatchLevel"
+          },
+          "mismatchPoints": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Mismatchpoints",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ongoingCareCostLevel": {
+            "$ref": "#/components/schemas/CostLevel"
+          },
+          "pendingItems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pendingitems",
+            "type": "array"
+          },
+          "sourceIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sourceids",
+            "type": "array"
+          },
+          "suitableReasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suitablereasons",
+            "type": "array"
+          },
+          "tradeoffs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tradeoffs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "directionId",
+          "name",
+          "kind",
+          "matchLevel",
+          "suitableReasons",
+          "tradeoffs",
+          "mismatchPoints",
+          "pendingItems",
+          "acquisitionCostLevel",
+          "ongoingCareCostLevel",
+          "sourceIds",
+          "evidenceNote"
+        ],
+        "title": "PublicDirectionResult",
+        "type": "object"
+      },
+      "PublicErrorBody": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "message": {
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "retryable",
+          "details"
+        ],
+        "title": "PublicErrorBody",
+        "type": "object"
+      },
+      "PublicErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/PublicErrorBody"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "required": [
+          "error",
+          "meta"
+        ],
+        "title": "PublicErrorResponse",
+        "type": "object"
+      },
+      "PublicEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "sourceId": {
+            "title": "Sourceid",
+            "type": "string"
+          },
+          "sourceLocator": {
+            "title": "Sourcelocator",
+            "type": "string"
+          },
+          "sourceName": {
+            "title": "Sourcename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceId",
+          "sourceName",
+          "sourceLocator"
+        ],
+        "title": "PublicEvidence",
+        "type": "object"
+      },
+      "PublicMerchantResult": {
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "title": "Displayname",
+            "type": "string"
+          },
+          "isSimulated": {
+            "default": true,
+            "title": "Issimulated",
+            "type": "boolean"
+          },
+          "merchantId": {
+            "title": "Merchantid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "displayName"
+        ],
+        "title": "PublicMerchantResult",
+        "type": "object"
+      },
+      "PublicMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "messageId": {
+            "minLength": 1,
+            "title": "Messageid",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "USER",
+              "ASSISTANT"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "messageId",
+          "role",
+          "content",
+          "createdAt"
+        ],
+        "title": "PublicMessage",
+        "type": "object"
+      },
+      "PublicPetResult": {
+        "additionalProperties": false,
+        "properties": {
+          "acquisitionCostLevel": {
+            "$ref": "#/components/schemas/CostLevel"
+          },
+          "contactAction": {
+            "$ref": "#/components/schemas/PublicContactAction"
+          },
+          "dataNature": {
+            "$ref": "#/components/schemas/DataNature"
+          },
+          "directionId": {
+            "title": "Directionid",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PublicEvidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "knownNotes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Knownnotes",
+            "type": "array"
+          },
+          "listingDisclosure": {
+            "title": "Listingdisclosure",
+            "type": "string"
+          },
+          "listingStatus": {
+            "$ref": "#/components/schemas/ListingStatus"
+          },
+          "matchLevel": {
+            "$ref": "#/components/schemas/MatchLevel"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/PublicMerchantResult"
+          },
+          "mismatchPoints": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Mismatchpoints",
+            "type": "array"
+          },
+          "nickname": {
+            "title": "Nickname",
+            "type": "string"
+          },
+          "ongoingCareCostLevel": {
+            "$ref": "#/components/schemas/CostLevel"
+          },
+          "pendingItems": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pendingitems",
+            "type": "array"
+          },
+          "petId": {
+            "title": "Petid",
+            "type": "string"
+          },
+          "sourceIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sourceids",
+            "type": "array"
+          },
+          "suitableReasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suitablereasons",
+            "type": "array"
+          },
+          "tradeoffs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tradeoffs",
+            "type": "array"
+          },
+          "unknownFields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unknownfields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "petId",
+          "nickname",
+          "directionId",
+          "matchLevel",
+          "suitableReasons",
+          "tradeoffs",
+          "mismatchPoints",
+          "pendingItems",
+          "knownNotes",
+          "unknownFields",
+          "acquisitionCostLevel",
+          "ongoingCareCostLevel",
+          "sourceIds",
+          "dataNature",
+          "listingStatus",
+          "merchant",
+          "listingDisclosure",
+          "contactAction"
+        ],
+        "title": "PublicPetResult",
+        "type": "object"
+      },
+      "PublicProfileChange": {
+        "additionalProperties": false,
+        "properties": {
+          "previousValue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicProfileValue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "slotName": {
+            "$ref": "#/components/schemas/PublicProfileSlotName"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SlotStatus"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicProfileValue"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "slotName",
+          "status"
+        ],
+        "title": "PublicProfileChange",
+        "type": "object"
+      },
+      "PublicProfileSlotName": {
+        "enum": [
+          "speciesScope",
+          "directionAndSizePreference",
+          "agePreference",
+          "coatAppearancePreference",
+          "interactionRhythm",
+          "companionshipDistance",
+          "currentTimeArrangement",
+          "ongoingInvestmentWillingness",
+          "disturbanceTolerance",
+          "allergySpecies",
+          "absoluteBottomLines",
+          "acceptedAdjustments",
+          "priorityNotes",
+          "volunteeredContext"
+        ],
+        "type": "string"
+      },
+      "PublicProfileValue": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        ]
+      },
+      "PublicQuestion": {
+        "additionalProperties": false,
+        "properties": {
+          "questionId": {
+            "minLength": 1,
+            "title": "Questionid",
+            "type": "string"
+          },
+          "quickReplies": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Quickreplies",
+            "type": "array"
+          },
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionId",
+          "text",
+          "quickReplies"
+        ],
+        "title": "PublicQuestion",
+        "type": "object"
+      },
+      "PublicRecommendation": {
+        "additionalProperties": false,
+        "properties": {
+          "directions": {
+            "items": {
+              "$ref": "#/components/schemas/PublicDirectionResult"
+            },
+            "title": "Directions",
+            "type": "array"
+          },
+          "disclaimer": {
+            "default": "咕噜港负责匹配并帮助联系商家进一步了解，不直接销售宠物。",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "generalRisks": {
+            "default": [
+              "品种或类型只表示群体倾向，具体个体仍需继续了解",
+              "平台不对宠物健康、性格或持续在售作绝对保证"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Generalrisks",
+            "type": "array"
+          },
+          "petAvailabilityNote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Petavailabilitynote"
+          },
+          "pets": {
+            "items": {
+              "$ref": "#/components/schemas/PublicPetResult"
+            },
+            "title": "Pets",
+            "type": "array"
+          },
+          "priorityMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prioritymessage"
+          }
+        },
+        "required": [
+          "directions",
+          "pets"
+        ],
+        "title": "PublicRecommendation",
+        "type": "object"
+      },
+      "PublicRecommendationChange": {
+        "additionalProperties": false,
+        "properties": {
+          "changeType": {
+            "enum": [
+              "ADDED",
+              "REMOVED",
+              "LEVEL_CHANGED",
+              "STATUS_CHANGED",
+              "UNCHANGED"
+            ],
+            "title": "Changetype",
+            "type": "string"
+          },
+          "detail": {
+            "minLength": 1,
+            "title": "Detail",
+            "type": "string"
+          },
+          "subjectId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subjectid"
+          }
+        },
+        "required": [
+          "changeType",
+          "detail"
+        ],
+        "title": "PublicRecommendationChange",
+        "type": "object"
+      },
+      "PublicSlotSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SlotStatus"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "PublicSlotSummary",
+        "type": "object"
+      },
+      "RecommendationData": {
+        "additionalProperties": false,
+        "properties": {
+          "conversation": {
+            "$ref": "#/components/schemas/PublicConversationSummary"
+          },
+          "recommendation": {
+            "$ref": "#/components/schemas/PublicRecommendation"
+          }
+        },
+        "required": [
+          "conversation",
+          "recommendation"
+        ],
+        "title": "RecommendationData",
+        "type": "object"
+      },
+      "RecommendationMode": {
+        "enum": [
+          "NONE",
+          "PROVISIONAL",
+          "FINAL"
+        ],
+        "title": "RecommendationMode",
+        "type": "string"
+      },
+      "RecommendationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RecommendationData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "RecommendationResponse",
+        "type": "object"
+      },
+      "ResponseMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "requestId": {
+            "minLength": 1,
+            "title": "Requestid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId"
+        ],
+        "title": "ResponseMeta",
+        "type": "object"
+      },
+      "SendMessageRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseRevision": {
+            "minimum": 0.0,
+            "title": "Baserevision",
+            "type": "integer"
+          },
+          "clientMessageId": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Clientmessageid",
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "quickReplyId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quickreplyid"
+          }
+        },
+        "required": [
+          "clientMessageId",
+          "baseRevision",
+          "content"
+        ],
+        "title": "SendMessageRequest",
+        "type": "object"
+      },
+      "SlotStatus": {
+        "enum": [
+          "UNKNOWN",
+          "INFERRED",
+          "CONFIRMED",
+          "DECLINED",
+          "CONFLICTED"
+        ],
+        "title": "SlotStatus",
+        "type": "string"
+      },
+      "TurnData": {
+        "additionalProperties": false,
+        "properties": {
+          "assistantMessage": {
+            "$ref": "#/components/schemas/PublicMessage"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/PublicConversationSummary"
+          },
+          "nextQuestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicQuestion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profileChanges": {
+            "items": {
+              "$ref": "#/components/schemas/PublicProfileChange"
+            },
+            "title": "Profilechanges",
+            "type": "array"
+          },
+          "quickReplies": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Quickreplies",
+            "type": "array"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicRecommendation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recommendationChanges": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PublicRecommendationChange"
+            },
+            "title": "Recommendationchanges",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "conversation",
+          "assistantMessage",
+          "profileChanges",
+          "nextQuestion",
+          "quickReplies",
+          "recommendation",
+          "warnings"
+        ],
+        "title": "TurnData",
+        "type": "object"
+      },
+      "TurnResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TurnData"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ResponseMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "TurnResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "咕噜港 AI 选宠顾问",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/conversations": {
+      "post": {
+        "operationId": "create_conversation_api_v1_conversations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateConversationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Conversation",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/api/v1/conversations/{conversation_id}": {
+      "delete": {
+        "operationId": "reset_conversation_api_v1_conversations__conversation_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicErrorResponse"
+                }
+              }
+            },
+            "description": "会话不存在或已经重置"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicErrorResponse"
+                }
+              }
+            },
+            "description": "会话已经过期"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reset Conversation",
+        "tags": [
+          "conversations"
+        ]
+      },
+      "get": {
+        "operationId": "get_conversation_api_v1_conversations__conversation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetConversationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Conversation",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/messages": {
+      "post": {
+        "operationId": "send_message_api_v1_conversations__conversation_id__messages_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send Message",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/profile": {
+      "patch": {
+        "operationId": "patch_profile_api_v1_conversations__conversation_id__profile_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Patch Profile",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/recommendations": {
+      "get": {
+        "operationId": "get_recommendations_api_v1_conversations__conversation_id__recommendations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Recommendations",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    }
+  }
+}

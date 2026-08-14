@@ -1,74 +1,77 @@
 from datetime import UTC, datetime
 
 from app.domain.conflicts import detect_conflicts
-from app.domain.profile import (
-    ConstraintStrength,
-    PetPreferenceProfile,
-    SlotStatus,
-    SlotValue,
-    YesNoUncertain,
-)
+from app.domain.profile import PetPreferenceProfile, SlotStatus, SlotValue
 
 NOW = datetime(2026, 8, 4, tzinfo=UTC)
 
 
-def confirmed[T](value: T, *, hard: bool = False, source: str = "m-1") -> SlotValue[T]:
+def conflicted[T](value: T, *, source: str = "m-1") -> SlotValue[T]:
+    return SlotValue[T](
+        value=value,
+        status=SlotStatus.CONFLICTED,
+        sourceMessageIds=(source, "m-2"),
+        updatedAt=NOW,
+    )
+
+
+def confirmed[T](value: T, *, source: str = "m-1") -> SlotValue[T]:
     return SlotValue[T](
         value=value,
         status=SlotStatus.CONFIRMED,
-        constraintStrength=ConstraintStrength.HARD if hard else ConstraintStrength.UNSET,
         sourceMessageIds=(source,),
         updatedAt=NOW,
     )
 
 
-def test_long_alone_time_conflicts_with_highly_affectionate_preference() -> None:
-    profile = PetPreferenceProfile(
-        aloneHours=confirmed(10, hard=True),
-        activityPreference=confirmed("HIGHLY_AFFECTIONATE"),
-    )
+def test_relationship_conflict_is_marked_for_clarification() -> None:
+    profile = PetPreferenceProfile(interactionRhythm=conflicted("ACTIVE"))
 
     conflicts = detect_conflicts(profile)
 
-    assert conflicts[0].code == "ALONE_TIME_VS_COMPANIONSHIP"
-    assert conflicts[0].slotNames == ("aloneHours", "activityPreference")
-    assert conflicts[0].questionId == "clarify-alone-vs-companionship"
+    assert [item.code for item in conflicts] == [
+        "SLOT_VALUE_CONFLICT:interactionRhythm"
+    ]
+    assert conflicts[0].questionId == "clarify-slot-interactionRhythm"
 
 
-def test_explicit_slot_conflict_precedes_soft_preference_conflict() -> None:
+def test_volunteered_context_conflict_does_not_force_a_question() -> None:
     profile = PetPreferenceProfile(
-        petAllowed=SlotValue[YesNoUncertain](
-            value=YesNoUncertain.YES,
-            status=SlotStatus.CONFLICTED,
-            constraintStrength=ConstraintStrength.HARD,
-            sourceMessageIds=("m-1", "m-3"),
-            updatedAt=NOW,
-        ),
-        aloneHours=confirmed(10, hard=True, source="m-1"),
-        activityPreference=confirmed("HIGHLY_AFFECTIONATE", source="m-2"),
+        volunteeredContext=conflicted(("住房情况出现两个说法",)),
+    )
+
+    assert detect_conflicts(profile) == ()
+
+
+def test_legacy_lifestyle_combination_is_a_gap_not_an_automatic_conflict() -> None:
+    profile = PetPreferenceProfile(
+        aloneHours=confirmed(10),
+        activityPreference=confirmed("HIGHLY_AFFECTIONATE"),
+    )
+
+    assert detect_conflicts(profile) == ()
+
+
+def test_allergy_and_bottom_line_conflicts_precede_preference_conflict() -> None:
+    profile = PetPreferenceProfile(
+        allergySpecies=conflicted(("CAT",)),
+        absoluteBottomLines=conflicted(("SHEDDING_MAX:LOW",)),
+        directionAndSizePreference=conflicted(("CORGI",)),
     )
 
     conflicts = detect_conflicts(profile)
 
     assert [item.code for item in conflicts] == [
-        "SLOT_VALUE_CONFLICT:petAllowed",
-        "ALONE_TIME_VS_COMPANIONSHIP",
+        "SLOT_VALUE_CONFLICT:allergySpecies",
+        "SLOT_VALUE_CONFLICT:absoluteBottomLines",
+        "SLOT_VALUE_CONFLICT:directionAndSizePreference",
     ]
 
 
 def test_conflict_order_is_deterministic() -> None:
     profile = PetPreferenceProfile(
-        aloneHours=confirmed(10, hard=True),
-        activityPreference=confirmed("HIGHLY_AFFECTIONATE"),
-        dailyExerciseMinutes=confirmed(15, hard=True),
-        speciesPreference=confirmed("HIGH_ENERGY_DOG"),
+        companionshipDistance=conflicted("CLOSE", source="m-3"),
+        interactionRhythm=conflicted("ACTIVE", source="m-1"),
     )
 
-    first = detect_conflicts(profile)
-    second = detect_conflicts(profile)
-
-    assert first == second
-    assert [item.code for item in first] == [
-        "EXERCISE_VS_HIGH_ENERGY_DOG",
-        "ALONE_TIME_VS_COMPANIONSHIP",
-    ]
+    assert detect_conflicts(profile) == detect_conflicts(profile)

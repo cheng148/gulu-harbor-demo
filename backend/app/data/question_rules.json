@@ -1,13 +1,65 @@
 [
-  {"questionId":"confirm-pet-permission","targetSlots":["petAllowed"],"category":"BLOCKER","fixedOrder":0,"promptTemplateId":"pet-permission","prompt":"你的住房、房东或物业规定明确允许养猫或养狗吗？","quickReplies":["明确允许","明确不允许","还不确定"]},
-  {"questionId":"confirm-household-consent","targetSlots":["householdConsent"],"category":"CRITICAL","fixedOrder":1,"promptTemplateId":"household-consent","prompt":"共同居住的人是否都同意养宠？","quickReplies":["都同意","有人反对","还没讨论"]},
-  {"questionId":"confirm-allergy","targetSlots":["allergyLevel"],"category":"CRITICAL","fixedOrder":2,"promptTemplateId":"allergy","prompt":"你或同住家人接触猫狗后有过敏反应吗？","quickReplies":["没有","轻微或不确定","严重过敏","不想回答"]},
-  {"questionId":"confirm-stable-care","targetSlots":["stableCarePlan"],"category":"CRITICAL","fixedOrder":3,"promptTemplateId":"stable-care","prompt":"未来几年里，是否有稳定的人每天负责喂养、清洁和就医？","quickReplies":["有稳定安排","目前没有","还不确定"]},
-  {"questionId":"confirm-companion-and-alone-time","targetSlots":["dailyCompanionHours","aloneHours"],"category":"CRITICAL","fixedOrder":4,"promptTemplateId":"companion-time","prompt":"普通工作日里，宠物每天大约会独处多久？","quickReplies":["少于4小时","4至8小时","8至10小时","超过10小时"]},
-  {"questionId":"confirm-exercise-time","targetSlots":["dailyExerciseMinutes"],"category":"CRITICAL","fixedOrder":5,"promptTemplateId":"exercise-time","prompt":"你每天能稳定安排多少分钟陪宠物运动或互动？","quickReplies":["少于20分钟","20至45分钟","45至90分钟","90分钟以上"]},
-  {"questionId":"confirm-budget","targetSlots":["monthlyBudgetCny","emergencyBudgetReady"],"category":"CRITICAL","fixedOrder":6,"promptTemplateId":"budget","prompt":"除初始费用外，你能稳定承担的每月预算和突发医疗准备大致怎样？","quickReplies":["500元内","500至1000元","1000元以上","暂不确定"]},
-  {"questionId":"confirm-housing-space","targetSlots":["housingType","spaceLevel"],"category":"CRITICAL","fixedOrder":7,"promptTemplateId":"housing-space","prompt":"你目前住在什么类型和大小的空间？","quickReplies":["小户型公寓","普通公寓","较大住宅","其他"]},
-  {"questionId":"confirm-household-safety","targetSlots":["householdMembers","otherPets"],"category":"CRITICAL","fixedOrder":8,"promptTemplateId":"household-safety","prompt":"家里是否有幼儿、老人、孕妇或其他宠物？","quickReplies":["都没有","有幼儿","有老人或孕妇","有其他宠物","有多种情况"]},
-  {"questionId":"confirm-burden-tolerance","targetSlots":["sheddingTolerance","noiseTolerance","odorTolerance","groomingTolerance"],"category":"CRITICAL","fixedOrder":9,"promptTemplateId":"burden-tolerance","prompt":"掉毛、叫声、气味和日常美容里，你最不能接受哪一项？","quickReplies":["掉毛","叫声","气味","频繁美容","都可商量"]},
-  {"questionId":"ask-size-preference","targetSlots":["sizePreference"],"category":"PREFERENCE","fixedOrder":100,"promptTemplateId":"size-preference","prompt":"在安全和照护条件都合适的前提下，你更喜欢什么体型？","quickReplies":["小型","中型","大型","都可以"]}
+  {
+    "questionId": "ask-current-time",
+    "targetSlots": ["currentTimeArrangement"],
+    "category": "CORE",
+    "fixedOrder": 10,
+    "promptTemplateId": "current-time",
+    "prompt": "普通工作日里，宠物大约会独处多久？你每天通常能留出多少时间陪它活动？",
+    "quickReplies": ["独处较少，时间比较充足", "大约4到8小时", "大约8小时以上", "每天情况不太固定"]
+  },
+  {
+    "questionId": "ask-relationship-style",
+    "targetSlots": ["interactionRhythm", "companionshipDistance"],
+    "category": "CORE",
+    "fixedOrder": 20,
+    "promptTemplateId": "relationship-style",
+    "prompt": "你更期待怎样的相处感觉：经常一起玩、安静待在身边，还是彼此留一点空间？",
+    "quickReplies": ["喜欢经常互动", "安静陪在附近", "亲近但不用一直黏着", "都可以慢慢认识"]
+  },
+  {
+    "questionId": "ask-daily-burden",
+    "targetSlots": ["ongoingInvestmentWillingness", "disturbanceTolerance", "absoluteBottomLines"],
+    "category": "CORE",
+    "fixedOrder": 30,
+    "promptTemplateId": "daily-burden",
+    "prompt": "训练、运动、掉毛、叫声和日常打理里，有没有你特别不想接受的，或者愿意慢慢适应的？",
+    "quickReplies": ["比较在意掉毛和清洁", "比较在意叫声", "不想投入太多训练或美容", "大多可以商量"]
+  },
+  {
+    "questionId": "ask-direction-and-size",
+    "targetSlots": ["directionAndSizePreference"],
+    "category": "PREFERENCE",
+    "fixedOrder": 100,
+    "promptTemplateId": "direction-and-size",
+    "prompt": "你心里有没有特别想认识的品种或类型？体型上也可以一起告诉我。",
+    "quickReplies": ["偏小型", "偏中型", "偏大型", "品种和体型都可以"]
+  },
+  {
+    "questionId": "ask-age-stage",
+    "targetSlots": ["agePreference"],
+    "category": "PREFERENCE",
+    "fixedOrder": 110,
+    "promptTemplateId": "age-stage",
+    "prompt": "年龄阶段上，你更想从幼年开始陪伴，还是更愿意认识性格已经比较看得出来的成年宠物？",
+    "quickReplies": ["更偏幼年", "更偏成年", "都可以"]
+  },
+  {
+    "questionId": "ask-coat-and-appearance",
+    "targetSlots": ["coatAppearancePreference"],
+    "category": "PREFERENCE",
+    "fixedOrder": 120,
+    "promptTemplateId": "coat-and-appearance",
+    "prompt": "毛发和外形上有偏好吗？没有特别要求也完全可以。",
+    "quickReplies": ["偏短毛", "偏长毛", "有喜欢的颜色或外形", "没有特别要求"]
+  },
+  {
+    "questionId": "confirm-species-allergy",
+    "targetSlots": ["allergySpecies"],
+    "category": "ALLERGY",
+    "fixedOrder": 1000,
+    "promptTemplateId": "species-allergy",
+    "prompt": "推荐前再轻轻确认一下：你接触猫或狗时，有没有明确的过敏情况？",
+    "quickReplies": ["猫狗都不过敏", "对猫过敏", "对狗过敏", "不太确定"]
+  }
 ]

@@ -7,16 +7,23 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, TypeAdapter
 
 from app.domain.conflicts import DetectedConflict
-from app.domain.constraints import ConstraintDecision, ConstraintOutcome
+from app.domain.constraints import ConstraintDecision
 from app.domain.profile import PetPreferenceProfile, SlotStatus
 
 
 class QuestionCategory(StrEnum):
-    BLOCKER = "BLOCKER"
     CONFLICT = "CONFLICT"
-    CRITICAL = "CRITICAL"
-    DISCRIMINATING = "DISCRIMINATING"
+    CORE = "CORE"
     PREFERENCE = "PREFERENCE"
+    ALLERGY = "ALLERGY"
+
+
+class QuestionImpact(StrEnum):
+    NONE = "NONE"
+    BACKUP_ORDER_ONLY = "BACKUP_ORDER_ONLY"
+    TOP_TWO_ORDER_ONLY = "TOP_TWO_ORDER_ONLY"
+    IMPORTANT_LEVEL_CHANGE = "IMPORTANT_LEVEL_CHANGE"
+    TOP_TWO_MEMBER_CHANGE = "TOP_TWO_MEMBER_CHANGE"
 
 
 class QuestionRule(BaseModel):
@@ -40,13 +47,19 @@ class NextQuestion(BaseModel):
     promptTemplateId: str
     prompt: str
     quickReplies: tuple[str, ...]
+    isExtra: bool = False
 
 
-_CATEGORY_PRIORITY = {
-    QuestionCategory.BLOCKER: 0,
-    QuestionCategory.CRITICAL: 2,
-    QuestionCategory.DISCRIMINATING: 3,
-    QuestionCategory.PREFERENCE: 4,
+_IMPACT_PRIORITY = {
+    QuestionImpact.NONE: 0,
+    QuestionImpact.BACKUP_ORDER_ONLY: 1,
+    QuestionImpact.TOP_TWO_ORDER_ONLY: 2,
+    QuestionImpact.IMPORTANT_LEVEL_CHANGE: 3,
+    QuestionImpact.TOP_TWO_MEMBER_CHANGE: 4,
+}
+_EXTRA_QUESTION_IMPACTS = {
+    QuestionImpact.IMPORTANT_LEVEL_CHANGE,
+    QuestionImpact.TOP_TWO_MEMBER_CHANGE,
 }
 
 
@@ -63,15 +76,48 @@ def _is_missing(profile: PetPreferenceProfile, target_slots: tuple[str, ...]) ->
     )
 
 
+def _to_next_question(rule: QuestionRule, *, is_extra: bool = False) -> NextQuestion:
+    return NextQuestion(
+        questionId=rule.questionId,
+        targetSlots=rule.targetSlots,
+        category=rule.category,
+        promptTemplateId=rule.promptTemplateId,
+        prompt=rule.prompt,
+        quickReplies=rule.quickReplies,
+        isExtra=is_extra,
+    )
+
+
+def _select_by_impact(
+    rules: list[QuestionRule],
+    candidate_impact: dict[str, QuestionImpact],
+) -> QuestionRule | None:
+    if not rules:
+        return None
+    return min(
+        rules,
+        key=lambda rule: (
+            -_IMPACT_PRIORITY[candidate_impact.get(rule.questionId, QuestionImpact.NONE)],
+            rule.fixedOrder,
+            rule.questionId,
+        ),
+    )
+
+
 def select_next_question(
     profile: PetPreferenceProfile,
     blockers: tuple[ConstraintDecision, ...],
     conflicts: tuple[DetectedConflict, ...],
     *,
     questionHistory: tuple[str, ...] = (),
-    candidateImpact: dict[str, int] | None = None,
+    coreQuestionCount: int = 0,
+    extraQuestionUsed: bool = False,
+    candidateImpact: dict[str, QuestionImpact] | None = None,
 ) -> NextQuestion | None:
-    if conflicts:
+    del blockers
+    impact = candidateImpact or {}
+
+    if conflicts and not extraQuestionUsed:
         conflict = conflicts[0]
         return NextQuestion(
             questionId=conflict.questionId,
@@ -80,41 +126,41 @@ def select_next_question(
             promptTemplateId=conflict.questionId,
             prompt=conflict.question,
             quickReplies=(),
+            isExtra=True,
         )
 
-    clarification_slots = {
-        slot
-        for blocker in blockers
-        if blocker.outcome is ConstraintOutcome.CLARIFY
-        for slot in blocker.affectedSlots
-    }
-    impact = candidateImpact or {}
-    eligible: list[QuestionRule] = []
-    for rule in load_question_rules():
-        if rule.questionId in questionHistory:
-            continue
-        if rule.category is QuestionCategory.BLOCKER:
-            if clarification_slots.intersection(rule.targetSlots):
-                eligible.append(rule)
-        elif _is_missing(profile, rule.targetSlots):
-            eligible.append(rule)
+    rules = load_question_rules()
+    eligible_core = [
+        rule
+        for rule in rules
+        if rule.category is QuestionCategory.CORE
+        and rule.questionId not in questionHistory
+        and _is_missing(profile, rule.targetSlots)
+    ]
+    if coreQuestionCount < 3 and eligible_core:
+        selected = _select_by_impact(eligible_core, impact)
+        return _to_next_question(selected) if selected is not None else None
 
-    if not eligible:
-        return None
-    selected = min(
-        eligible,
-        key=lambda rule: (
-            _CATEGORY_PRIORITY[rule.category],
-            -impact.get(rule.questionId, 0),
-            rule.fixedOrder,
-            rule.questionId,
-        ),
+    if not extraQuestionUsed:
+        eligible_extra = [
+            rule
+            for rule in rules
+            if rule.category is QuestionCategory.PREFERENCE
+            and rule.questionId not in questionHistory
+            and _is_missing(profile, rule.targetSlots)
+            and impact.get(rule.questionId) in _EXTRA_QUESTION_IMPACTS
+        ]
+        selected_extra = _select_by_impact(eligible_extra, impact)
+        if selected_extra is not None:
+            return _to_next_question(selected_extra, is_extra=True)
+
+    allergy_rule = next(
+        rule for rule in rules if rule.category is QuestionCategory.ALLERGY
     )
-    return NextQuestion(
-        questionId=selected.questionId,
-        targetSlots=selected.targetSlots,
-        category=selected.category,
-        promptTemplateId=selected.promptTemplateId,
-        prompt=selected.prompt,
-        quickReplies=selected.quickReplies,
-    )
+    if (
+        allergy_rule.questionId not in questionHistory
+        and _is_missing(profile, allergy_rule.targetSlots)
+    ):
+        return _to_next_question(allergy_rule)
+
+    return None

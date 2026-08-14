@@ -24,6 +24,13 @@ backend/**/*.pyc
 # Local data and scratch files
 backend/var/
 tmp/
+.pytest-tmp/
+.sites-stage-*/
+*.tar.gz
+prototypes/**/node_modules/
+prototypes/**/dist/
+prototypes/**/*.log
+references/*.pdf
 
 # Editors and operating system
 .idea/

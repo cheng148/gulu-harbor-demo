@@ -7,4 +7,10 @@ def test_health_reports_service_is_ready() -> None:
     response = TestClient(app).get("/health")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "gulu-port-agent"}
+    body = response.json()
+    assert body["data"] == {
+        "status": "ok",
+        "service": "gulu-port-agent",
+        "dependencies": {"configuration": "ok"},
+    }
+    assert body["meta"]["requestId"] == response.headers["X-Request-ID"]

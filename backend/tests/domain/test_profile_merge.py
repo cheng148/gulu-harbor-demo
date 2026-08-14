@@ -102,3 +102,98 @@ def test_replaying_same_message_is_idempotent() -> None:
 
     assert result.profile == confirmed_budget()
     assert result.conflicts == ()
+
+
+def test_explicit_any_is_confirmed_neutral_not_unknown() -> None:
+    delta = ProfileDelta(
+        sourceMessageId="m-neutral",
+        changes=(
+            ProfileChange(
+                slotName="directionAndSizePreference",
+                value=("ANY",),
+                status=SlotStatus.CONFIRMED,
+            ),
+        ),
+    )
+
+    result = merge_profile(PetPreferenceProfile(), delta, NOW)
+
+    slot = result.profile.directionAndSizePreference
+    assert slot.value == ("ANY",)
+    assert slot.status is SlotStatus.CONFIRMED
+    assert slot.sourceMessageIds == ("m-neutral",)
+
+
+def test_declined_answer_stays_valueless_but_keeps_its_source() -> None:
+    delta = ProfileDelta(
+        sourceMessageId="m-declined",
+        changes=(
+            ProfileChange(
+                slotName="companionshipDistance",
+                value=None,
+                status=SlotStatus.DECLINED,
+            ),
+        ),
+    )
+
+    result = merge_profile(PetPreferenceProfile(), delta, NOW)
+
+    slot = result.profile.companionshipDistance
+    assert slot.value is None
+    assert slot.status is SlotStatus.DECLINED
+    assert slot.sourceMessageIds == ("m-declined",)
+
+
+def test_conflict_keeps_both_the_confirmed_and_incoming_sources() -> None:
+    profile = PetPreferenceProfile(
+        interactionRhythm=SlotValue[str](
+            value="ACTIVE",
+            status=SlotStatus.CONFIRMED,
+            sourceMessageIds=("m-1",),
+            updatedAt=NOW,
+        )
+    )
+    delta = ProfileDelta(
+        sourceMessageId="m-2",
+        changes=(
+            ProfileChange(
+                slotName="interactionRhythm",
+                value="CALM",
+                status=SlotStatus.CONFIRMED,
+            ),
+        ),
+    )
+
+    result = merge_profile(profile, delta, NOW)
+
+    assert result.profile.interactionRhythm.status is SlotStatus.CONFLICTED
+    assert result.profile.interactionRhythm.value == "ACTIVE"
+    assert result.profile.interactionRhythm.sourceMessageIds == ("m-1", "m-2")
+    assert result.conflicts[0].incomingSourceMessageId == "m-2"
+
+
+def test_explicit_edit_replaces_a_revised_slot() -> None:
+    profile = PetPreferenceProfile(
+        interactionRhythm=SlotValue[str](
+            value="ACTIVE",
+            status=SlotStatus.CONFIRMED,
+            sourceMessageIds=("m-1",),
+            updatedAt=NOW,
+        )
+    )
+    delta = ProfileDelta(
+        sourceMessageId="edit-1",
+        changes=(
+            ProfileChange(
+                slotName="interactionRhythm",
+                value="CALM",
+                status=SlotStatus.CONFIRMED,
+            ),
+        ),
+    )
+
+    result = merge_profile(profile, delta, NOW, explicit_edit=True)
+
+    assert result.profile.interactionRhythm.value == "CALM"
+    assert result.profile.interactionRhythm.status is SlotStatus.CONFIRMED
+    assert result.profile.interactionRhythm.sourceMessageIds == ("m-1", "edit-1")

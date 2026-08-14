@@ -1,0 +1,4 @@
+[
+  {"merchantId":"merchant-harbor","displayName":"港湾宠物生活馆（模拟线下商家）","merchantType":"SIMULATED_OFFLINE","dataNature":"DEMO_SIMULATED","disclosure":"Demo模拟数据，不代表真实在售","contactActionAvailable":false},
+  {"merchantId":"merchant-cloud","displayName":"云朵宠物屋（模拟线上商家）","merchantType":"SIMULATED_ONLINE","dataNature":"DEMO_SIMULATED","disclosure":"Demo模拟数据，不代表真实在售","contactActionAvailable":false}
+]

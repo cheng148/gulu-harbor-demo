@@ -5,7 +5,6 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict
 
 from app.domain.conflicts import detect_conflicts
-from app.domain.constraints import ConstraintOutcome, evaluate_session_constraints
 from app.domain.profile import PetPreferenceProfile, SlotStatus
 
 
@@ -24,93 +23,98 @@ class ReadinessAssessment(BaseModel):
     blockingCodes: tuple[str, ...]
 
 
-_REQUIRED_SLOTS = (
-    "petAllowed",
-    "householdConsent",
-    "allergyLevel",
-    "stableCarePlan",
-    "dailyCompanionHours",
-    "aloneHours",
-    "dailyExerciseMinutes",
-    "monthlyBudgetCny",
-    "emergencyBudgetReady",
-    "housingType",
-    "spaceLevel",
-    "householdMembers",
-    "otherPets",
-)
-_BURDEN_SLOTS = (
-    "sheddingTolerance",
-    "noiseTolerance",
-    "odorTolerance",
-    "groomingTolerance",
+_CORE_SLOTS = (
+    "currentTimeArrangement",
+    "interactionRhythm",
+    "companionshipDistance",
+    "ongoingInvestmentWillingness",
+    "disturbanceTolerance",
+    "absoluteBottomLines",
 )
 
 
-def _missing_critical_slots(profile: PetPreferenceProfile) -> tuple[str, ...]:
-    missing = [
+def _missing_core_slots(profile: PetPreferenceProfile) -> tuple[str, ...]:
+    return tuple(
         name
-        for name in _REQUIRED_SLOTS
-        if getattr(profile, name).status is not SlotStatus.CONFIRMED
-    ]
-    if not any(
-        getattr(profile, name).status is SlotStatus.CONFIRMED for name in _BURDEN_SLOTS
-    ):
-        missing.append("burdenTolerance")
-    return tuple(missing)
+        for name in _CORE_SLOTS
+        if getattr(profile, name).status
+        in {SlotStatus.UNKNOWN, SlotStatus.INFERRED, SlotStatus.DECLINED}
+    )
+
+
+def _allergy_is_confirmed(profile: PetPreferenceProfile) -> bool:
+    return profile.allergySpecies.status is SlotStatus.CONFIRMED
 
 
 def assess_readiness(
     profile: PetPreferenceProfile,
     *,
     requestDirect: bool = False,
+    coreQuestionCount: int = 0,
+    extraQuestionUsed: bool = False,
+    importantUnknowns: tuple[str, ...] = (),
+    recommendationStable: bool = False,
+    allCandidatesExcluded: bool = False,
 ) -> ReadinessAssessment:
-    decisions = evaluate_session_constraints(profile)
     conflicts = detect_conflicts(profile)
-    missing = _missing_critical_slots(profile)
-
-    not_recommended = tuple(
-        item.code for item in decisions if item.outcome is ConstraintOutcome.NOT_RECOMMENDED
-    )
-    if not_recommended:
-        return ReadinessAssessment(
-            outcome=ReadinessOutcome.NOT_RECOMMENDED,
-            missingCriticalSlots=missing,
-            blockingCodes=not_recommended,
-        )
-
-    blocking = tuple(
-        item.code
-        for item in decisions
-        if item.outcome in {ConstraintOutcome.CLARIFY, ConstraintOutcome.BLOCK_FINAL}
-        and item.code != "EMERGENCY_BUDGET_NOT_READY"
-    )
     if conflicts:
-        blocking = (*blocking, *(item.code for item in conflicts))
-    if blocking:
         return ReadinessAssessment(
             outcome=ReadinessOutcome.CONTINUE_QUESTIONING,
-            missingCriticalSlots=missing,
-            blockingCodes=blocking,
+            missingCriticalSlots=importantUnknowns,
+            blockingCodes=tuple(item.code for item in conflicts),
         )
 
-    has_emergency_warning = any(
-        item.code == "EMERGENCY_BUDGET_NOT_READY" for item in decisions
-    )
-    if missing or has_emergency_warning:
-        outcome = (
-            ReadinessOutcome.PROVISIONAL
-            if requestDirect
-            else ReadinessOutcome.CONTINUE_QUESTIONING
-        )
+    if not _allergy_is_confirmed(profile):
         return ReadinessAssessment(
-            outcome=outcome,
-            missingCriticalSlots=missing,
+            outcome=ReadinessOutcome.CONTINUE_QUESTIONING,
+            missingCriticalSlots=("allergySpecies",),
+            blockingCodes=("ALLERGY_CONFIRMATION_REQUIRED",),
+        )
+
+    if allCandidatesExcluded:
+        return ReadinessAssessment(
+            outcome=ReadinessOutcome.NOT_RECOMMENDED,
+            missingCriticalSlots=(),
+            blockingCodes=("NO_ELIGIBLE_CANDIDATES",),
+        )
+
+    if importantUnknowns and not extraQuestionUsed and not requestDirect:
+        return ReadinessAssessment(
+            outcome=ReadinessOutcome.CONTINUE_QUESTIONING,
+            missingCriticalSlots=importantUnknowns,
+            blockingCodes=("EXTRA_QUESTION_REQUIRED",),
+        )
+
+    if requestDirect:
+        if recommendationStable and not importantUnknowns:
+            return ReadinessAssessment(
+                outcome=ReadinessOutcome.FINAL,
+                missingCriticalSlots=(),
+                blockingCodes=(),
+            )
+        return ReadinessAssessment(
+            outcome=ReadinessOutcome.PROVISIONAL,
+            missingCriticalSlots=importantUnknowns,
+            blockingCodes=(),
+        )
+
+    if importantUnknowns and extraQuestionUsed:
+        return ReadinessAssessment(
+            outcome=ReadinessOutcome.PROVISIONAL,
+            missingCriticalSlots=importantUnknowns,
+            blockingCodes=(),
+        )
+
+    missing_core = _missing_core_slots(profile)
+    if recommendationStable or coreQuestionCount >= 3 or not missing_core:
+        return ReadinessAssessment(
+            outcome=ReadinessOutcome.FINAL,
+            missingCriticalSlots=(),
             blockingCodes=(),
         )
 
     return ReadinessAssessment(
-        outcome=ReadinessOutcome.FINAL,
-        missingCriticalSlots=(),
+        outcome=ReadinessOutcome.CONTINUE_QUESTIONING,
+        missingCriticalSlots=missing_core,
         blockingCodes=(),
     )

@@ -7,7 +7,6 @@ from app.domain.constraints import (
     evaluate_session_constraints,
 )
 from app.domain.profile import (
-    AllergyLevel,
     ConstraintStrength,
     PetPreferenceProfile,
     SlotStatus,
@@ -28,63 +27,74 @@ def confirmed[T](value: T, *, hard: bool = False) -> SlotValue[T]:
     )
 
 
-def test_housing_ban_blocks_the_whole_session() -> None:
+def candidate(*, candidate_id: str = "pet-1", species: str = "DOG") -> CandidateRequirements:
+    return CandidateRequirements(
+        candidateId=candidate_id,
+        species=species,
+        minimumExerciseMinutes=90,
+        minimumMonthlyCostCny=900,
+        minimumCompanionHours=4,
+        maximumAloneHours=4,
+        sheddingLevel="HIGH",
+    )
+
+
+def test_unknown_housing_permission_is_not_a_required_clarification() -> None:
+    assert evaluate_session_constraints(PetPreferenceProfile()) == ()
+
+
+def test_volunteered_housing_ban_is_not_automatically_a_platform_blocker() -> None:
     profile = PetPreferenceProfile(petAllowed=confirmed(YesNoUncertain.NO, hard=True))
 
-    decisions = evaluate_session_constraints(profile)
-
-    assert decisions[0].outcome is ConstraintOutcome.NOT_RECOMMENDED
-    assert decisions[0].code == "PET_NOT_ALLOWED"
+    assert evaluate_session_constraints(profile) == ()
 
 
-def test_unknown_permission_requires_clarification_instead_of_rejection() -> None:
-    decisions = evaluate_session_constraints(PetPreferenceProfile())
-
-    assert any(
-        item.outcome is ConstraintOutcome.CLARIFY and item.code == "PET_PERMISSION_UNKNOWN"
-        for item in decisions
-    )
-    assert not any(item.outcome is ConstraintOutcome.NOT_RECOMMENDED for item in decisions)
-
-
-def test_severe_allergy_blocks_final_recommendation() -> None:
+def test_cat_allergy_excludes_cat_but_not_dog() -> None:
     profile = PetPreferenceProfile(
-        petAllowed=confirmed(YesNoUncertain.YES),
-        allergyLevel=confirmed(AllergyLevel.SEVERE, hard=True),
+        allergySpecies=confirmed(("CAT",), hard=True),
     )
 
-    decisions = evaluate_session_constraints(profile)
-
-    assert any(item.code == "SEVERE_ALLERGY_UNASSESSED" for item in decisions)
-    assert any(item.outcome is ConstraintOutcome.BLOCK_FINAL for item in decisions)
-
-
-def test_exercise_mismatch_excludes_only_that_candidate() -> None:
-    profile = PetPreferenceProfile(dailyExerciseMinutes=confirmed(20, hard=True))
-    candidate = CandidateRequirements(
-        candidateId="high-energy-dog",
-        minimumExerciseMinutes=90,
-        minimumMonthlyCostCny=500,
+    cat_decisions = evaluate_candidate_constraints(
+        profile, candidate(candidate_id="cat-1", species="CAT")
+    )
+    dog_decisions = evaluate_candidate_constraints(
+        profile, candidate(candidate_id="dog-1", species="DOG")
     )
 
-    decisions = evaluate_candidate_constraints(profile, candidate)
+    assert [item.code for item in cat_decisions] == ["SPECIES_ALLERGY"]
+    assert cat_decisions[0].outcome is ConstraintOutcome.EXCLUDE_CANDIDATE
+    assert dog_decisions == ()
 
-    assert decisions[0].outcome is ConstraintOutcome.EXCLUDE_CANDIDATE
-    assert decisions[0].code == "EXERCISE_INSUFFICIENT"
+
+def test_time_and_activity_gaps_do_not_exclude_a_candidate() -> None:
+    profile = PetPreferenceProfile(
+        dailyExerciseMinutes=confirmed(20, hard=True),
+        dailyCompanionHours=confirmed(1, hard=True),
+        aloneHours=confirmed(10, hard=True),
+    )
+
+    assert evaluate_candidate_constraints(profile, candidate()) == ()
 
 
-def test_hard_budget_excludes_candidate_before_soft_preferences() -> None:
+def test_budget_gap_does_not_exclude_a_candidate() -> None:
     profile = PetPreferenceProfile(monthlyBudgetCny=confirmed(400, hard=True))
-    candidate = CandidateRequirements(
-        candidateId="expensive-perfect-looking-pet",
-        minimumExerciseMinutes=10,
-        minimumMonthlyCostCny=900,
+
+    assert evaluate_candidate_constraints(profile, candidate()) == ()
+
+
+def test_ordinary_shedding_preference_does_not_exclude_a_candidate() -> None:
+    profile = PetPreferenceProfile(sheddingTolerance=confirmed("LOW"))
+
+    assert evaluate_candidate_constraints(profile, candidate()) == ()
+
+
+def test_explicit_shedding_bottom_line_excludes_before_scoring() -> None:
+    profile = PetPreferenceProfile(
+        absoluteBottomLines=confirmed(("SHEDDING_MAX:LOW",), hard=True),
     )
 
-    decisions = evaluate_candidate_constraints(profile, candidate)
+    decisions = evaluate_candidate_constraints(profile, candidate())
 
-    assert any(
-        item.outcome is ConstraintOutcome.EXCLUDE_CANDIDATE
-        and item.code == "BUDGET_TOO_LOW"
-        for item in decisions
-    )
+    assert [item.code for item in decisions] == ["ABSOLUTE_BOTTOM_LINE"]
+    assert decisions[0].outcome is ConstraintOutcome.EXCLUDE_CANDIDATE
+    assert decisions[0].affectedSlots == ("absoluteBottomLines",)
