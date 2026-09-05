@@ -147,6 +147,83 @@ def test_all_four_operations_return_the_shared_provider_schemas() -> None:
     assert provider.review_safety(safety_request) == safety_response
 
 
+def test_profile_prompt_does_not_turn_qualitative_cost_into_a_numeric_budget() -> None:
+    request = ProfileExtractionRequest(
+        scenarioId="live-cost",
+        stepId="turn-4-extract",
+        messageId="message-4",
+        text="我能接受中等花费。",
+    )
+    expected = ProfileExtractionResponse(
+        delta=ProfileDelta(sourceMessageId="message-4", changes=())
+    )
+
+    def handler(http_request: httpx.Request) -> httpx.Response:
+        body = json.loads(http_request.content)
+        system_prompt = body["messages"][0]["content"]
+        assert "ongoingInvestmentWillingness" in system_prompt
+        assert "monthlyBudgetCny" in system_prompt
+        assert "never invent a numeric budget" in system_prompt
+        assert "empty array" in system_prompt
+        assert "absoluteBottomLines" in system_prompt
+        assert "allergySpecies" in system_prompt
+        return httpx.Response(
+            200, json=_completion(expected.model_dump_json()), request=http_request
+        )
+
+    assert _provider(handler).extract_profile(request) == expected
+
+
+def test_noncanonical_scoring_token_is_retried_once() -> None:
+    request = ProfileExtractionRequest(
+        scenarioId="live-time",
+        stepId="turn-2-extract",
+        messageId="message-2",
+        text="工作日时间不算多。",
+    )
+    invalid = json.dumps(
+        {
+            "delta": {
+                "sourceMessageId": "message-2",
+                "changes": [
+                    {
+                        "slotName": "currentTimeArrangement",
+                        "value": "WORKDAY_LIMITED_TIME",
+                        "status": "CONFIRMED",
+                    }
+                ],
+            },
+            "isExplicitEdit": False,
+        }
+    )
+    expected = ProfileExtractionResponse.model_validate(
+        {
+            "delta": {
+                "sourceMessageId": "message-2",
+                "changes": [
+                    {
+                        "slotName": "currentTimeArrangement",
+                        "value": "LOW_MEDIUM",
+                        "status": "CONFIRMED",
+                    }
+                ],
+            }
+        }
+    )
+    contents = iter((invalid, expected.model_dump_json()))
+    calls = 0
+
+    def handler(http_request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(
+            200, json=_completion(next(contents)), request=http_request
+        )
+
+    assert _provider(handler).extract_profile(request) == expected
+    assert calls == 2
+
+
 @pytest.mark.parametrize("content", [None, "", "   "])
 def test_empty_model_content_is_invalid(content: str | None) -> None:
     calls = 0

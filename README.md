@@ -31,7 +31,7 @@ flowchart LR
   A --> S["SQLite 会话状态"]
 ```
 
-模型只负责理解表达和润色问法；硬约束过滤、匹配等级与排序由可测试代码决定。当前浏览器 Demo 使用确定性 Mock；DeepSeek 适配器、无效响应最多一次重试和完整失败回滚已完成假HTTP集成测试，但尚未使用真实Key运行真人流程，不能对外表述为“真人模型已验证”。
+模型只负责理解表达和润色问法；硬约束过滤、匹配等级与排序由可测试代码决定。当前浏览器 Demo 使用确定性 Mock；DeepSeek 适配器、无效响应最多一次重试和完整失败回滚已完成假HTTP集成测试。2026-09-05又使用`DeepSeek-V4-Flash-0731`完成一条5轮真人流程。推荐解释与安全复核已单独调用真人模型验证，但尚未接入主API推荐提交路径，不能对外表述为该部分已经端到端接线。
 
 ## 已验证的演示路径
 
@@ -82,6 +82,8 @@ powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 - [实施计划](specs/IMPLEMENTATION_PLAN.md)
 - [TDD 任务与证据](specs/TASKS.md)
 - [重要决策记录](docs/decisions.md)
+- [真人模型观察](docs/evaluation/live-model-observations.md)
+- [演示脚本](docs/demo-script.md)
 
 ## 安全说明
 
@@ -92,4 +94,4 @@ powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 
 ## 当前进度
 
-Gate 0 规格、Gate 1 计划、UX-01、T06R–T34 及 T36–T39 已完成，平台前端原型外壳和公开手机体验版已经可用。下一项是 T35 受控真人模型演示；尚未完成真人模型演示、固定评测集、完整前后端正式部署与第一版全部验收。
+Gate 0 规格、Gate 1 计划、UX-01 和 T06R–T39 已完成；Phase 6真人演示与Phase 7前端外壳均已通过，公开手机体验版可用。下一步进入Phase 8：固定评测集、完整浏览器审查、展示材料和最终全量验证。完整FastAPI与DeepSeek后端尚未部署到公开网址，第一版也尚未完成最终验收。

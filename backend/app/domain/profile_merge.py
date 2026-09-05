@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -57,6 +57,26 @@ type ProfileSlotName = Literal[
 ]
 type ProfileValue = str | int | float | bool | tuple[str, ...]
 
+_MULTI_VALUE_SLOTS: frozenset[ProfileSlotName] = frozenset(
+    {
+        "speciesScope",
+        "directionAndSizePreference",
+        "coatAppearancePreference",
+        "disturbanceTolerance",
+        "allergySpecies",
+        "absoluteBottomLines",
+        "acceptedAdjustments",
+        "volunteeredContext",
+        "householdMembers",
+        "otherPets",
+        "appearancePreferences",
+        "priorityNotes",
+    }
+)
+_INTEGER_SLOTS: frozenset[ProfileSlotName] = frozenset(
+    {"dailyExerciseMinutes", "monthlyBudgetCny"}
+)
+
 
 class ProfileChange(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -65,6 +85,20 @@ class ProfileChange(BaseModel):
     value: ProfileValue | None = None
     status: SlotStatus
     constraintStrength: ConstraintStrength = ConstraintStrength.UNSET
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_single_multi_value(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        if data.get("slotName") not in _MULTI_VALUE_SLOTS:
+            return data
+        value = data.get("value")
+        if not isinstance(value, str):
+            return data
+        normalized = dict(data)
+        normalized["value"] = (value,)
+        return normalized
 
     @model_validator(mode="after")
     def validate_delta_status(self) -> ProfileChange:
@@ -75,6 +109,12 @@ class ProfileChange(BaseModel):
             raise ValueError("a declined change cannot contain a value")
         if self.status is not SlotStatus.DECLINED and self.value is None:
             raise ValueError("an evidenced change must contain a value")
+        if (
+            self.slotName in _INTEGER_SLOTS
+            and self.value is not None
+            and type(self.value) is not int
+        ):
+            raise ValueError("an integer profile slot must contain an integer")
         return self
 
 

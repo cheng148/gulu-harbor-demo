@@ -25,12 +25,12 @@ def test_free_text_updates_profile_and_skips_core_topics_already_answered() -> N
         changes=(
             ProfileChange(
                 slotName="currentTimeArrangement",
-                value="TIME_FLEXIBLE",
+                value="HIGH",
                 status=SlotStatus.CONFIRMED,
             ),
             ProfileChange(
                 slotName="interactionRhythm",
-                value="ACTIVE",
+                value="HIGH",
                 status=SlotStatus.CONFIRMED,
             ),
             ProfileChange(
@@ -40,7 +40,7 @@ def test_free_text_updates_profile_and_skips_core_topics_already_answered() -> N
             ),
             ProfileChange(
                 slotName="ongoingInvestmentWillingness",
-                value="WILLING",
+                value="HIGH",
                 status=SlotStatus.CONFIRMED,
             ),
             ProfileChange(
@@ -62,7 +62,7 @@ def test_free_text_updates_profile_and_skips_core_topics_already_answered() -> N
     )
     updated = result["conversation"]
 
-    assert updated.profile.currentTimeArrangement.value == "TIME_FLEXIBLE"
+    assert updated.profile.currentTimeArrangement.value == "HIGH"
     assert updated.profile.interactionRhythm.sourceMessageIds == (MESSAGE_ID,)
     assert result["nextQuestion"].questionId == "confirm-species-allergy"
     assert "ask-current-time" not in updated.questionHistory
@@ -80,7 +80,7 @@ def test_two_profiles_can_follow_different_dynamic_question_branches() -> None:
         changes=(
             ProfileChange(
                 slotName="currentTimeArrangement",
-                value="TIME_LIMITED",
+                value="LOW",
                 status=SlotStatus.CONFIRMED,
             ),
         ),
@@ -105,7 +105,7 @@ def test_two_profiles_can_follow_different_dynamic_question_branches() -> None:
         changes=(
             ProfileChange(
                 slotName="currentTimeArrangement",
-                value="TIME_FLEXIBLE",
+                value="HIGH",
                 status=SlotStatus.CONFIRMED,
             ),
             ProfileChange(
@@ -133,7 +133,7 @@ def test_two_profiles_can_follow_different_dynamic_question_branches() -> None:
 def test_conflicting_statement_is_preserved_and_clarified_before_other_questions() -> (
     None
 ):
-    profile = PetPreferenceProfile(interactionRhythm=confirmed("ACTIVE"))
+    profile = PetPreferenceProfile(interactionRhythm=confirmed("HIGH"))
     state = conversation(profile=profile)
     message = "其实我现在更想要安静一点的陪伴。"
     conflict_question = NextQuestion(
@@ -151,7 +151,7 @@ def test_conflicting_statement_is_preserved_and_clarified_before_other_questions
         changes=(
             ProfileChange(
                 slotName="interactionRhythm",
-                value="CALM",
+                value="LOW_MEDIUM",
                 status=SlotStatus.CONFIRMED,
             ),
         ),
@@ -165,7 +165,7 @@ def test_conflicting_statement_is_preserved_and_clarified_before_other_questions
 
     assert updated.stage is ConversationStage.RESOLVING_CONFLICT
     assert updated.profile.interactionRhythm.status is SlotStatus.CONFLICTED
-    assert updated.profile.interactionRhythm.value == "ACTIVE"
+    assert updated.profile.interactionRhythm.value == "HIGH"
     assert updated.conflicts == ("SLOT_VALUE_CONFLICT:interactionRhythm",)
     assert result["nextQuestion"].questionId == "clarify-slot-interactionRhythm"
 
@@ -174,7 +174,7 @@ def test_explicit_correction_wins_and_stale_model_inference_cannot_overwrite_it(
     None
 ):
     profile = PetPreferenceProfile(
-        interactionRhythm=confirmed("ACTIVE"),
+        interactionRhythm=confirmed("HIGH"),
         allergySpecies=confirmed(()),
     )
     state = conversation(profile=profile, core_question_count=3)
@@ -185,12 +185,12 @@ def test_explicit_correction_wins_and_stale_model_inference_cannot_overwrite_it(
         changes=(
             ProfileChange(
                 slotName="interactionRhythm",
-                value="CALM",
+                value="LOW_MEDIUM",
                 status=SlotStatus.CONFIRMED,
             ),
             ProfileChange(
                 slotName="interactionRhythm",
-                value="ACTIVE",
+                value="HIGH",
                 status=SlotStatus.INFERRED,
             ),
         ),
@@ -203,7 +203,7 @@ def test_explicit_correction_wins_and_stale_model_inference_cannot_overwrite_it(
     )
     updated = result["conversation"]
 
-    assert updated.profile.interactionRhythm.value == "CALM"
+    assert updated.profile.interactionRhythm.value == "LOW_MEDIUM"
     assert updated.profile.interactionRhythm.status is SlotStatus.CONFIRMED
     assert updated.conflicts == ()
     assert updated.stage is ConversationStage.READY_TO_MATCH
@@ -240,7 +240,7 @@ def test_model_cannot_upgrade_an_ordinary_preference_into_a_hard_constraint() ->
         changes=(
             ProfileChange(
                 slotName="coatAppearancePreference",
-                value=("LOW_SHEDDING_PREFERRED",),
+                value=("SHORT_HAIR",),
                 status=SlotStatus.CONFIRMED,
                 constraintStrength=ConstraintStrength.HARD,
             ),

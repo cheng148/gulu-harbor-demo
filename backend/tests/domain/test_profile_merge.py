@@ -1,5 +1,8 @@
 from datetime import UTC, datetime
 
+import pytest
+from pydantic import ValidationError
+
 from app.domain.profile import (
     ConstraintStrength,
     PetPreferenceProfile,
@@ -9,6 +12,41 @@ from app.domain.profile import (
 from app.domain.profile_merge import ProfileChange, ProfileDelta, merge_profile
 
 NOW = datetime(2026, 8, 4, 10, tzinfo=UTC)
+
+
+def test_single_text_for_a_multi_value_slot_is_normalized_to_one_item() -> None:
+    """Real models may emit one selected token as a scalar instead of an array."""
+    delta = ProfileDelta.model_validate(
+        {
+            "sourceMessageId": "message-live-1",
+            "changes": [
+                {
+                    "slotName": "coatAppearancePreference",
+                    "value": "SHORT_HAIR",
+                    "status": "CONFIRMED",
+                    "constraintStrength": "PREFERENCE",
+                }
+            ],
+        }
+    )
+
+    assert delta.changes[0].value == ("SHORT_HAIR",)
+
+
+def test_qualitative_cost_cannot_be_stored_as_a_numeric_monthly_budget() -> None:
+    with pytest.raises(ValidationError):
+        ProfileDelta.model_validate(
+            {
+                "sourceMessageId": "message-live-4",
+                "changes": [
+                    {
+                        "slotName": "monthlyBudgetCny",
+                        "value": "MEDIUM",
+                        "status": "CONFIRMED",
+                    }
+                ],
+            }
+        )
 
 
 def confirmed_budget() -> PetPreferenceProfile:

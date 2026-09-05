@@ -124,6 +124,80 @@ def validate_profile_extraction_response(
             ProviderFailureCode.INVALID_OUTPUT,
             "profile delta source does not match the input message",
         )
+    canonical_values = {
+        "speciesScope": {"CAT", "DOG"},
+        "directionAndSizePreference": {
+            "CAT-ADULT-LOCAL-MIX",
+            "CAT-BRITISH-SHORTHAIR",
+            "CAT-AMERICAN-SHORTHAIR",
+            "CAT-RAGDOLL",
+            "DOG-ADULT-LOCAL-MIX",
+            "DOG-TOY-MINI-POODLE",
+            "DOG-PEMBROKE-CORGI",
+            "DOG-LABRADOR-RETRIEVER",
+            "LARGE",
+            "MEDIUM",
+            "MEDIUM_LARGE",
+            "MINI_SMALL_MEDIUM",
+            "TOY_SMALL",
+            "VARIABLE",
+            "ANY",
+        },
+        "coatAppearancePreference": {
+            "CURLY_HAIR",
+            "SEMI_LONG_HAIR",
+            "SHORT_HAIR",
+            "VARIABLE",
+            "ANY",
+        },
+        "interactionRhythm": {
+            "HIGH",
+            "LOW",
+            "LOW_MEDIUM",
+            "MEDIUM",
+            "MEDIUM_HIGH",
+            "VARIABLE",
+            "ANY",
+        },
+        "companionshipDistance": {
+            "ACTIVE_APPROACH",
+            "CLOSE",
+            "FOLLOWING",
+            "INDEPENDENT",
+            "NEARBY",
+            "SAME_ROOM",
+            "VARIABLE",
+            "ANY",
+        },
+        "currentTimeArrangement": {
+            "HIGH",
+            "LOW",
+            "LOW_MEDIUM",
+            "MEDIUM",
+            "MEDIUM_HIGH",
+            "VARIABLE",
+            "ANY",
+        },
+        "ongoingInvestmentWillingness": {
+            "HIGH",
+            "LOW",
+            "MEDIUM",
+            "MEDIUM_HIGH",
+            "ANY",
+        },
+        "allergySpecies": {"CAT", "DOG"},
+        "agePreference": {"ADULT", "YOUNG_ADULT", "ANY"},
+    }
+    for change in response.delta.changes:
+        allowed = canonical_values.get(change.slotName)
+        if allowed is None or change.value is None:
+            continue
+        values = change.value if isinstance(change.value, tuple) else (change.value,)
+        if any(str(value).upper() not in allowed for value in values):
+            raise ProviderFailure(
+                ProviderFailureCode.INVALID_OUTPUT,
+                f"profile delta used a noncanonical value for {change.slotName}",
+            )
     return response
 
 

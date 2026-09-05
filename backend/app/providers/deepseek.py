@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import TypeVar
 
 import httpx
@@ -48,7 +49,27 @@ _OPERATION_INSTRUCTIONS: dict[type[ProviderRequest], str] = {
     ProfileExtractionRequest: (
         "Extract a structured profile delta only from the supplied user message and "
         "current context. Preserve uncertainty and never turn an ordinary preference "
-        "into a hard constraint."
+        "into a hard constraint. Facts directly stated by the user are CONFIRMED; use "
+        "INFERRED only for a genuine inference. Prefer the current profile slots and "
+        "canonical tokens already used by the application: speciesScope uses CAT or "
+        "DOG arrays; directionAndSizePreference uses direction IDs; "
+        "for example British Shorthair plus medium size becomes "
+        "[cat-british-shorthair, MEDIUM]. Never put a breed in the legacy "
+        "speciesPreference slot. coatAppearancePreference uses SHORT_HAIR, "
+        "SEMI_LONG_HAIR, CURLY_HAIR, or ANY; agePreference uses YOUNG_ADULT, "
+        "ADULT, or ANY. For relationship answers use only these matching tokens: "
+        "interactionRhythm is LOW_MEDIUM, MEDIUM, MEDIUM_HIGH, HIGH, or ANY; quiet "
+        "interaction maps to LOW_MEDIUM. companionshipDistance is ACTIVE_APPROACH, "
+        "CLOSE, FOLLOWING, INDEPENDENT, NEARBY, SAME_ROOM, or ANY; staying nearby "
+        "maps to NEARBY. "
+        "currentTimeArrangement is LOW_MEDIUM, MEDIUM, MEDIUM_HIGH, HIGH, or ANY. "
+        "Qualitative cost willingness belongs in "
+        "ongoingInvestmentWillingness as LOW, MEDIUM, or HIGH. Use monthlyBudgetCny "
+        "only when the user states an explicit numeric monthly amount; never invent a "
+        "numeric budget. When the user explicitly reports no absolute bottom line, "
+        "set absoluteBottomLines to an empty array with CONFIRMED and HARD; do not "
+        "invent a token meaning none. When the user explicitly reports no cat or dog "
+        "allergy, set allergySpecies to an empty array with CONFIRMED and HARD."
     ),
     QuestionWordingRequest: (
         "Rewrite the supplied prompt in warm, natural Simplified Chinese. Preserve "
@@ -84,7 +105,10 @@ class DeepSeekProvider:
         self._http_client = http_client or httpx.Client()
 
     def _complete(
-        self, request: ProviderRequest, response_model: type[ResponseT]
+        self,
+        request: ProviderRequest,
+        response_model: type[ResponseT],
+        validator: Callable[[ResponseT], ResponseT] | None = None,
     ) -> ResponseT:
         schema = json.dumps(
             response_model.model_json_schema(),
@@ -110,7 +134,8 @@ class DeepSeekProvider:
 
         for attempt in range(2):
             try:
-                return self._complete_once(payload, response_model)
+                response = self._complete_once(payload, response_model)
+                return validator(response) if validator is not None else response
             except ProviderFailure as error:
                 if error.code is not ProviderFailureCode.INVALID_OUTPUT or attempt == 1:
                     raise
@@ -167,14 +192,20 @@ class DeepSeekProvider:
     def extract_profile(
         self, request: ProfileExtractionRequest
     ) -> ProfileExtractionResponse:
-        response = self._complete(request, ProfileExtractionResponse)
-        return validate_profile_extraction_response(request, response)
+        return self._complete(
+            request,
+            ProfileExtractionResponse,
+            lambda response: validate_profile_extraction_response(request, response),
+        )
 
     def phrase_question(
         self, request: QuestionWordingRequest
     ) -> QuestionWordingResponse:
-        response = self._complete(request, QuestionWordingResponse)
-        return validate_question_wording_response(request, response)
+        return self._complete(
+            request,
+            QuestionWordingResponse,
+            lambda response: validate_question_wording_response(request, response),
+        )
 
     def explain_recommendation(
         self, request: RecommendationExplanationRequest
