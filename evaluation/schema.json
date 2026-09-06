@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gulu-harbor.local/evaluation/schema.json",
+  "title": "咕噜港固定评测案例",
+  "description": "T40固定评测集的单条案例格式；T41运行器将按steps执行并按expectations判定。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "caseId",
+    "title",
+    "description",
+    "category",
+    "surface",
+    "tags",
+    "sddCoverage",
+    "steps",
+    "expectations"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "caseId": {"type": "string", "pattern": "^EVAL-[0-9]{3}$"},
+    "title": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "category": {
+      "enum": [
+        "NORMAL",
+        "VAGUE_BEGINNER",
+        "CONFLICT",
+        "HARD_RISK",
+        "NOT_SUITABLE",
+        "NO_PET_CANDIDATE",
+        "MODIFY_CONDITIONS",
+        "SYSTEM_BOUNDARY"
+      ]
+    },
+    "surface": {"enum": ["AGENT", "API", "WEB_APP"]},
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "sddCoverage": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^SDD-22-(0[1-9]|[12][0-9]|3[0-5])$"}
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "payload"],
+        "properties": {
+          "action": {
+            "enum": [
+              "SUBMIT_MESSAGE",
+              "REQUEST_EARLY_RECOMMENDATION",
+              "RUN_MATCH",
+              "INJECT_MODEL_FAILURE",
+              "REPEAT_RUN",
+              "ADVANCE_TIME",
+              "RESET_SESSION",
+              "OPEN_WEB_APP",
+              "INSTALL_WEB_APP",
+              "CLICK_PROTOTYPE_ACTION"
+            ]
+          },
+          "payload": {"type": "object"}
+        }
+      }
+    },
+    "expectations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "operator"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "operator": {
+            "enum": [
+              "EQUALS",
+              "NOT_EQUALS",
+              "CONTAINS",
+              "NOT_CONTAINS",
+              "EMPTY",
+              "NOT_EMPTY",
+              "COUNT_EQUALS",
+              "MAX_EQUALS",
+              "SET_EQUALS",
+              "NO_NETWORK"
+            ]
+          },
+          "value": {}
+        }
+      }
+    }
+  }
+}
