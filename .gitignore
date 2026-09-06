@@ -21,6 +21,8 @@ backend/.coverage
 backend/htmlcov/
 backend/__pycache__/
 backend/**/*.pyc
+__pycache__/
+*.pyc
 
 # Local data and scratch files
 backend/var/
