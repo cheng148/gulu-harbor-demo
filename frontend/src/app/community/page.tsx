@@ -31,7 +31,7 @@ export default function CommunityPage() {
         <header className="prototype-header"><Link href="/" aria-label="返回首页"><ArrowLeft aria-hidden="true" /></Link><div><small>港湾里的相处故事</small><h1>社区</h1></div><span>Demo</span></header>
         <section className={styles.intro}><div><span>虚构改写内容</span><h2>看看大家怎样慢慢熟悉彼此</h2><p>这里可以浏览、点赞和收藏；真实发帖与评论暂未开放。</p></div><DemoUnavailable actionLabel="发布动态" ariaLabel="发布动态" subject="真实社区发帖" className={styles.publish}><Plus aria-hidden="true" />发布动态</DemoUnavailable></section>
         <div className={styles.feed}>
-          {communityPosts.map((post) => <PostCard key={post.id} post={post} isLiked={state.likedPostIds.includes(post.id)} isFavorite={state.favoriteIds.includes(post.id)} onToggleLike={() => toggleLike(post.id)} onToggleFavorite={() => toggleFavorite(post.id)} onOpen={() => setSelectedPost(post)} />)}
+          {communityPosts.map((post) => <PostCard key={post.id} post={post} isLiked={state.likedPostIds.includes(post.id)} isFavorite={state.favoriteIds.includes(post.id)} onToggleLike={() => toggleLike(post.id)} onToggleFavorite={() => toggleFavorite(post.id)} onOpen={() => setSelectedPost(post)} eagerImage />)}
         </div>
       </main>
       <SiteNav current="community" />

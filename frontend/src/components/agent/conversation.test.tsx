@@ -74,7 +74,7 @@ describe("AI选宠对话页", () => {
     const client = api();
     render(<AgentExperience api={client} storage={window.localStorage} />);
 
-    expect(await screen.findByText("先聊聊你的日常")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "先聊聊你的日常" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "普通工作日里，宠物大约会独处多久？" })).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "选宠对话" })).getAllByRole("heading", { level: 2 })).toHaveLength(1);
     expect(screen.getByRole("button", { name: "大约4到8小时" })).toBeInTheDocument();

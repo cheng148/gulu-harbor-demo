@@ -58,8 +58,8 @@ export default function MarketPage() {
             {([['all', '全部'], ['cat', '只看猫猫'], ['dog', '只看狗狗']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={kind === value} onClick={() => setKind(value)}>{label}</button>)}
           </div>
           <ItemGrid emptyMessage="暂时没找到这个品种方向，换个关键词看看吧。">
-            {categories.map((category) => <article className="prototype-card market-category-card" aria-label={`${category.name}品种`} key={category.id}>
-              <div className="prototype-card__image"><Image src={category.image} alt={`${category.name}品种示意照片`} width={1254} height={1254} /><span>Demo虚拟数据</span></div>
+            {categories.map((category, index) => <article className="prototype-card market-category-card" aria-label={`${category.name}品种`} key={category.id}>
+              <div className="prototype-card__image"><Image src={category.image} alt={`${category.name}品种示意照片`} width={1254} height={1254} loading={index === 0 ? "eager" : "lazy"} /><span>Demo虚拟数据</span></div>
               <div className="prototype-card__body"><small>{category.kind === "cat" ? "猫猫方向" : "狗狗方向"}</small><h2>{category.name}</h2><div className="category-metrics"><span>近30天模拟成交 {category.sold}</span><span>相关交易好评率 {category.praise}%</span><span>当前模拟在售 {category.available} 只</span></div><button type="button" aria-label={`查看${category.name}的模拟在售宠物`} onClick={() => setSelectedCategoryId(category.id)}>看看 2 位小伙伴</button></div>
             </article>)}
           </ItemGrid>

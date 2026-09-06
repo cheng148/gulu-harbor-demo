@@ -104,7 +104,7 @@ export function AgentExperience({ api, storage, onRecommendationReady }: Props) 
 
   const pageTitle = question ? titles[question.questionId] ?? "继续认识彼此" : "这轮聊天整理好了";
   return <div className="app-shell agent-shell">
-    <header className="agent-header"><Link href="/" aria-label="返回首页"><ArrowLeft aria-hidden="true" /></Link><div><strong>{pageTitle}</strong>{conversation && <small><CheckCircle2 aria-hidden="true" />保存至 {new Date(conversation.expiresAt).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</small>}</div><span aria-hidden="true" /></header>
+    <header className="agent-header"><Link href="/" aria-label="返回首页"><ArrowLeft aria-hidden="true" /></Link><div><h1>{pageTitle}</h1>{conversation && <small><CheckCircle2 aria-hidden="true" />保存至 {new Date(conversation.expiresAt).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</small>}</div><span aria-hidden="true" /></header>
     <main className="agent-main">
       {state === "loading" && <div className="agent-state" role="status"><span className="gulu-avatar">咕</span><p>正在把聊天的小桌子收拾好…</p></div>}
       {state === "error" && <div className="agent-state" role="alert"><h1>刚刚有点走神</h1><p>{error}</p><button type="button" onClick={() => void start()}>再试一次</button></div>}

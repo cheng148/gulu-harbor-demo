@@ -66,9 +66,9 @@ export default function Home() {
         {category !== "shops" && (
           <section className="content-section" id="recommendations">
             <div className="section-heading"><div><p>大家最近常来看</p><h1>近期人气榜</h1></div><span>近7天模拟热度</span></div>
-            {visiblePets.length ? <div className="pet-grid">{visiblePets.map((pet) => (
+            {visiblePets.length ? <div className="pet-grid">{visiblePets.map((pet, index) => (
               <article className="pet-card" aria-label={`${pet.name}宠物档案`} key={pet.id}>
-                <div className="card-image-wrap"><Image src={`/assets/gulu/pet-${pet.id}.png`} alt={`${pet.name}的模拟在售档案照片`} width={1254} height={1254} /><span>Demo虚拟数据</span></div>
+                <div className="card-image-wrap"><Image src={`/assets/gulu/pet-${pet.id}.png`} alt={`${pet.name}的模拟在售档案照片`} width={1254} height={1254} loading={index === 0 ? "eager" : "lazy"} /><span>Demo虚拟数据</span></div>
                 <div className="pet-card__body"><div className="pet-card__title"><h2>{pet.name}</h2><span>{pet.breed}</span></div><p>{pet.note}</p><div className="demo-metrics pet-interest"><span>近7天浏览 {pet.views.toLocaleString("zh-CN")} 次</span><span>{pet.interested} 人想进一步了解</span></div><DemoUnavailable actionLabel="看看档案" subject={`${pet.name}档案查看`} /></div>
               </article>
             ))}</div> : <p className="empty-state">暂时没找到相符的小伙伴，换个关键词试试吧。</p>}

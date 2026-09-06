@@ -22,13 +22,14 @@ type PostCardProps = {
   onToggleLike: () => void;
   onToggleFavorite: () => void;
   onOpen: () => void;
+  eagerImage?: boolean;
 };
 
-export function PostCard({ post, isLiked, isFavorite, onToggleLike, onToggleFavorite, onOpen }: PostCardProps) {
+export function PostCard({ post, isLiked, isFavorite, onToggleLike, onToggleFavorite, onOpen, eagerImage = false }: PostCardProps) {
   return (
     <article className={styles.card} aria-label={`${post.title}社区帖子`}>
       <button className={styles.cover} type="button" aria-label={`从配图查看${post.title}`} onClick={onOpen}>
-        <Image src={post.image} alt={`${post.pet}的Demo帖子配图`} width={1254} height={1254} />
+        <Image src={post.image} alt={`${post.pet}的Demo帖子配图`} width={1254} height={1254} loading={eagerImage ? "eager" : "lazy"} />
         <span>Demo虚拟内容</span>
       </button>
       <div className={styles.body}>

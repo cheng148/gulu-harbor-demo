@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { DemoUnavailable } from "./demo-unavailable";
@@ -21,5 +21,19 @@ describe("T36 统一暂未开放反馈", () => {
     fireEvent.click(screen.getByRole("button", { name: "知道了" }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("键盘打开后聚焦关闭按钮，Escape关闭并把焦点还给触发按钮", async () => {
+    render(<DemoUnavailable actionLabel="发布动态" subject="真实发帖" />);
+    const trigger = screen.getByRole("button", { name: "发布动态" });
+
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "关闭" })).toHaveFocus());
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(trigger).toHaveFocus();
   });
 });

@@ -23,7 +23,7 @@ export function PetCard({ pet, index, allCaution }: Readonly<{ pet: Pet; index: 
   const pending = [...pet.pendingItems, ...pet.unknownFields].map((item) => pendingCopy[item] ?? item);
   return <article className="result-pet-card" aria-label={`${pet.nickname}候选宠物档案`}>
     <div className="result-position">{positionCopy(index, allCaution)}</div>
-    <Image src={image ?? "/assets/gulu/harbor-hero.png"} width={1024} height={1024} alt={image ? `${pet.nickname}的Demo模拟候选宠物档案插画` : `${pet.nickname}档案的港湾主题占位插画`} />
+    <Image src={image ?? "/assets/gulu/harbor-hero.png"} width={1024} height={1024} loading={index === 0 ? "eager" : "lazy"} alt={image ? `${pet.nickname}的Demo模拟候选宠物档案插画` : `${pet.nickname}档案的港湾主题占位插画`} />
     <div className="result-pet-card__body"><header><span><small>具体候选宠物</small><h3>{pet.nickname}</h3></span><i data-level={pet.matchLevel}>{matchCopy[pet.matchLevel]}</i></header>
       <p className="listing-chip">{pet.listingDisclosure}</p>
       <Notes title="这只小伙伴的合拍点" items={pet.suitableReasons} />
