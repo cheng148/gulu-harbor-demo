@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Protocol, runtime_checkable
+from typing import Annotated, Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -77,19 +77,19 @@ class RecommendationExplanationResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     intro: str = Field(min_length=1)
-    items: tuple[str, ...]
+    items: tuple[Annotated[str, Field(min_length=1)], ...]
 
 
 class SafetyReviewRequest(ProviderRequest):
-    draftTexts: tuple[str, ...] = Field(min_length=1)
+    draftTexts: tuple[Annotated[str, Field(min_length=1)], ...] = Field(min_length=1)
 
 
 class SafetyReviewResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     isApproved: bool
-    flags: tuple[str, ...] = ()
-    safeReplacementTexts: tuple[str, ...] = ()
+    flags: tuple[Annotated[str, Field(min_length=1)], ...] = ()
+    safeReplacementTexts: tuple[Annotated[str, Field(min_length=1)], ...] = ()
 
     @model_validator(mode="after")
     def rejected_review_requires_a_reason(self) -> SafetyReviewResponse:
@@ -113,6 +113,32 @@ class ModelProvider(Protocol):
     ) -> RecommendationExplanationResponse: ...
 
     def review_safety(self, request: SafetyReviewRequest) -> SafetyReviewResponse: ...
+
+
+def validate_recommendation_explanation_response(
+    request: RecommendationExplanationRequest,
+    response: RecommendationExplanationResponse,
+) -> RecommendationExplanationResponse:
+    if len(response.items) != len(request.facts):
+        raise ProviderFailure(
+            ProviderFailureCode.INVALID_OUTPUT,
+            "recommendation explanation does not correspond to supplied facts",
+        )
+    return response
+
+
+def validate_safety_review_response(
+    request: SafetyReviewRequest,
+    response: SafetyReviewResponse,
+) -> SafetyReviewResponse:
+    if not response.isApproved and len(response.safeReplacementTexts) != len(
+        request.draftTexts
+    ):
+        raise ProviderFailure(
+            ProviderFailureCode.INVALID_OUTPUT,
+            "rejected safety review requires one replacement for every draft text",
+        )
+    return response
 
 
 def validate_profile_extraction_response(

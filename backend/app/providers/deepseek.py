@@ -21,6 +21,8 @@ from app.providers.base import (
     SafetyReviewResponse,
     validate_profile_extraction_response,
     validate_question_wording_response,
+    validate_recommendation_explanation_response,
+    validate_safety_review_response,
 )
 
 ResponseT = TypeVar("ResponseT", bound=BaseModel)
@@ -77,11 +79,14 @@ _OPERATION_INSTRUCTIONS: dict[type[ProviderRequest], str] = {
     ),
     RecommendationExplanationRequest: (
         "Explain only the supplied deterministic recommendation facts in warm, clear "
-        "Simplified Chinese. Do not change candidates, match levels, or factual claims."
+        "Simplified Chinese. Do not change candidates, match levels, or factual claims. "
+        "Return exactly one item for each fact, in the same order; when facts is empty, "
+        "return no items."
     ),
     SafetyReviewRequest: (
         "Review the supplied draft text for unsupported guarantees, medical diagnosis, "
-        "or unsafe claims. Return the structured review and safe replacements when needed."
+        "or unsafe claims. Return the structured review and, when rejecting, exactly one "
+        "safe replacement for each draft text in the same order."
     ),
 }
 
@@ -210,7 +215,17 @@ class DeepSeekProvider:
     def explain_recommendation(
         self, request: RecommendationExplanationRequest
     ) -> RecommendationExplanationResponse:
-        return self._complete(request, RecommendationExplanationResponse)
+        return self._complete(
+            request,
+            RecommendationExplanationResponse,
+            lambda response: validate_recommendation_explanation_response(
+                request, response
+            ),
+        )
 
     def review_safety(self, request: SafetyReviewRequest) -> SafetyReviewResponse:
-        return self._complete(request, SafetyReviewResponse)
+        return self._complete(
+            request,
+            SafetyReviewResponse,
+            lambda response: validate_safety_review_response(request, response),
+        )

@@ -199,6 +199,20 @@ export interface components {
             readonly constraintStrength: components["schemas"]["ConstraintStrength"];
             readonly value: components["schemas"]["PublicProfileValue"];
         };
+        /** PublicAINarrative */
+        readonly PublicAINarrative: {
+            /** Intro */
+            readonly intro: string;
+            /** Items */
+            readonly items: readonly components["schemas"]["PublicAINarrativeItem"][];
+        };
+        /** PublicAINarrativeItem */
+        readonly PublicAINarrativeItem: {
+            /** Subjectid */
+            readonly subjectId: string;
+            /** Text */
+            readonly text: string;
+        };
         /** PublicContactAction */
         readonly PublicContactAction: {
             /**
@@ -393,6 +407,7 @@ export interface components {
         };
         /** PublicRecommendation */
         readonly PublicRecommendation: {
+            readonly aiNarrative?: components["schemas"]["PublicAINarrative"] | null;
             /** Directions */
             readonly directions: readonly components["schemas"]["PublicDirectionResult"][];
             /**

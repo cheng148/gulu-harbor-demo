@@ -174,11 +174,26 @@ class PublicPetResult(BaseModel):
     contactAction: PublicContactAction
 
 
+class PublicAINarrativeItem(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    subjectId: str = Field(min_length=1)
+    text: str = Field(min_length=1)
+
+
+class PublicAINarrative(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    intro: str = Field(min_length=1)
+    items: tuple[PublicAINarrativeItem, ...]
+
+
 class PublicRecommendation(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     directions: tuple[PublicDirectionResult, ...]
     pets: tuple[PublicPetResult, ...]
+    aiNarrative: PublicAINarrative | None = None
     priorityMessage: str | None = None
     petAvailabilityNote: str | None = None
     generalRisks: tuple[str, ...] = (

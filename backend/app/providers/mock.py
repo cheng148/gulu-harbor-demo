@@ -16,6 +16,8 @@ from app.providers.base import (
     SafetyReviewResponse,
     validate_profile_extraction_response,
     validate_question_wording_response,
+    validate_recommendation_explanation_response,
+    validate_safety_review_response,
 )
 
 
@@ -81,7 +83,9 @@ class MockProvider:
     def explain_recommendation(
         self, request: RecommendationExplanationRequest
     ) -> RecommendationExplanationResponse:
-        return self._resolve(request, self.fixtures.recommendationExplanations)
+        response = self._resolve(request, self.fixtures.recommendationExplanations)
+        return validate_recommendation_explanation_response(request, response)
 
     def review_safety(self, request: SafetyReviewRequest) -> SafetyReviewResponse:
-        return self._resolve(request, self.fixtures.safetyReviews)
+        response = self._resolve(request, self.fixtures.safetyReviews)
+        return validate_safety_review_response(request, response)

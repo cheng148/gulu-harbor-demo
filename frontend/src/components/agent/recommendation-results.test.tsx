@@ -46,6 +46,14 @@ function recommendation(pets: Recommendation["pets"]): Recommendation {
       },
     ],
     pets,
+    aiNarrative: {
+      intro: "我把这次更值得认识的方向和伙伴整理好了。",
+      items: [
+        { subjectId: "cat-adult-local-mix", text: "这个方向更接近你期待的安静陪伴。" },
+        { subjectId: "cat-ragdoll", text: "这个方向值得认识，但长毛护理需要多留意。" },
+        ...(pets.length ? [{ subjectId: "pet-cat-local-01", text: "小麦的已知观察与当前期待较接近。" }] : []),
+      ],
+    },
     generalRisks: ["品种或类型只表示群体倾向，具体个体仍需继续了解"],
     disclaimer: "咕噜港负责匹配并帮助联系商家进一步了解，不直接销售宠物。",
     priorityMessage: "先从更接近你日常的方向看起。",
@@ -76,6 +84,14 @@ const xiaomai = {
 } as const;
 
 describe("T30 双层推荐结果", () => {
+  it("在结果顶部展示通过安全复核的AI整理说明", () => {
+    render(<RecommendationResults recommendation={recommendation([xiaomai])} />);
+
+    expect(screen.getByRole("heading", { name: "选宠搭子帮你捋一捋" })).toBeInTheDocument();
+    expect(screen.getByText("我把这次更值得认识的方向和伙伴整理好了。")).toBeInTheDocument();
+    expect(screen.getByText("小麦的已知观察与当前期待较接近。")).toBeInTheDocument();
+  });
+
   it("把品种／类型方向与具体候选宠物分层展示，并显示依据和代价", () => {
     render(<RecommendationResults recommendation={recommendation([xiaomai])} />);
 

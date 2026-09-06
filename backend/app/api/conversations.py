@@ -62,6 +62,7 @@ from app.domain.state import (
     MessageRole,
 )
 from app.providers.base import ModelProvider, ProviderFailure, ProviderFailureCode
+from app.services.recommendation_narrative import add_safe_ai_narrative
 from app.services.session_service import SessionService
 from app.services.turn_service import TurnService
 
@@ -316,6 +317,22 @@ def _run_message_graph(
         updated = cast(
             ConversationState, build_agent_graph().invoke(match_input)["conversation"]
         )
+        if updated.recommendations is None:
+            raise RuntimeError("matching must produce a public recommendation")
+        recommendation, safety_flags = add_safe_ai_narrative(
+            updated.recommendations,
+            provider,
+            scenario_id="api-conversation",
+            step_id=f"turn-{state.revision + 1}:recommendation",
+        )
+        updated = updated.model_copy(
+            update={
+                "recommendations": recommendation,
+                "safetyFlags": tuple(
+                    dict.fromkeys((*updated.safetyFlags, *safety_flags))
+                ),
+            }
+        )
         message = MessageRecord(
             messageId=f"{message_id}:recommendation",
             role=MessageRole.ASSISTANT,
@@ -486,6 +503,22 @@ def patch_profile(
                 ConversationState,
                 build_agent_graph().invoke(graph_state)["conversation"],
             )
+            if updated.recommendations is None:
+                raise RuntimeError("matching must produce a public recommendation")
+            recommendation, safety_flags = add_safe_ai_narrative(
+                updated.recommendations,
+                _model_provider(request),
+                scenario_id="api-profile-edit",
+                step_id=f"profile-edit-{state.revision + 1}:recommendation",
+            )
+            updated = updated.model_copy(
+                update={
+                    "recommendations": recommendation,
+                    "safetyFlags": tuple(
+                        dict.fromkeys((*updated.safetyFlags, *safety_flags))
+                    ),
+                }
+            )
             assistant = MessageRecord(
                 messageId=f"{source_id}:recommendation",
                 role=MessageRole.ASSISTANT,
@@ -498,7 +531,7 @@ def patch_profile(
             conversation_id, base_revision=payload.baseRevision, mutate=mutate
         )
     except (ConversationNotFoundError, SessionExpiredError, RevisionConflictError,
-            KnowledgeUnavailableError) as error:
+            KnowledgeUnavailableError, ProviderFailure) as error:
         revision = current.revision if "current" in locals() else None
         _raise_public_error(error, revision)
         raise AssertionError("unreachable") from error

@@ -132,6 +132,15 @@ def test_provider_output_schemas_reject_extra_or_malformed_model_data() -> None:
             }
         )
 
+    with pytest.raises(ValidationError):
+        SafetyReviewResponse.model_validate(
+            {
+                "isApproved": False,
+                "flags": ["需要更谨慎的表达"],
+                "safeReplacementTexts": [""],
+            }
+        )
+
 
 def test_question_wording_cannot_change_the_selected_question() -> None:
     mock = provider()

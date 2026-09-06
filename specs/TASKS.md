@@ -3,10 +3,10 @@
 ## 0. 文档状态
 
 - 项目：咕噜港AI选宠顾问Demo
-- 版本：0.3.5
+- 版本：0.3.6
 - 创建日期：2026-08-04
-- 输入：`specs/SDD_SPEC.md` 0.3.1、`specs/IMPLEMENTATION_PLAN.md` 0.2.2
-- 状态：UX-01最终版已批准；T06R至T39已完成，Phase 6与Phase 7均已通过；下一项进入Phase 8固定评测与最终验收
+- 输入：`specs/SDD_SPEC.md` 0.3.6、`specs/IMPLEMENTATION_PLAN.md` 0.2.2
+- 状态：UX-01最终版已批准；T06R至T39和T35B已完成；下一项进入Phase 8的T40固定评测集
 - 当前事实：统一模型契约、确定性Mock、LangGraph显式流程、动态追问、知识检索、双层推荐和风险说明已串联；三类5轮以上Mock对话已稳定复现
 - 门禁：T35真人演示与Mock证据已分开记录；Phase 8仍须完成固定评测、浏览器审查、展示材料和最终验证
 
@@ -566,6 +566,23 @@
 - 证据：`docs/evaluation/live-model-observations.md`、`docs/demo-script.md`；脱敏原始结果位于被Git忽略的`tmp/t35-live-result.json`。
 
 **检查点 R / Phase 6出口：已通过。** 缺Key不影响Mock；有Key真人流程已完成；异常回滚和安全重试均有证据。
+
+### T35B 将推荐解释与安全复核接入主API
+
+- 结果：用户形成推荐时，确定性代码先锁定方向、宠物、顺序、匹配等级和事实；模型只生成总体说明及逐项说明，安全复核通过后作为`aiNarrative`随推荐保存和返回。
+- 兼容：`aiNarrative`为新增可选字段，旧会话缺少该字段仍可读取；原结构化理由、代价、不匹配点和证据继续保留。
+- 失败边界：解释与事实数量不一致，或安全复核拒绝且没有完整替换文案时，本轮返回可重试错误并整体回滚；替换文案也不能改变确定性结论。
+- 文件：`specs/SDD_SPEC.md`、`backend/app/providers/base.py`、`backend/app/domain/matching.py`、`backend/app/api/conversations.py`、相关API与前端结果测试。
+- 依赖：T35；映射：SDD 12、15、24、AC-024/031；RED/GREEN：先证明主API未调用两项模型操作，再以确定性Mock验证通过、拒绝、无效数量和回滚。
+- 门禁：自动化不访问DeepSeek、不读取真实Key；本任务完成后才开始T40。
+
+**T35B完成记录（2026-09-06）：**
+
+- RED：主API专项测试先因公共推荐缺少`aiNarrative`失败；结果页组件测试先因没有“选宠搭子帮你捋一捋”区域失败。
+- GREEN：主消息与修改条件后的重新推荐都调用同一解释和安全复核服务；公共推荐以向后兼容的可选字段保存总体说明与逐项说明。逐项说明按确定性方向和宠物顺序绑定`subjectId`，模型不能改动既有候选、排序、等级和事实字段。
+- 失败保护：解释条数不对应，或安全复核拒绝且没有为每段文字提供完整替换时，返回`MODEL_INVALID_RESPONSE`并整轮回滚；完整安全替换可发布，复核标记保存在公共警告中。
+- 验证：后端218条测试通过；T35B相关37条API与DeepSeek假响应测试通过；Ruff、mypy通过。前端16个测试文件52条测试、ESLint、TypeScript、OpenAPI类型漂移和生产构建通过；390×844手机Chromium五轮主流程通过且控制台无错误。全部自动化使用Mock或假HTTP，未调用DeepSeek。
+- 真实性边界：T35已证明四类模型操作可分别使用真人DeepSeek；T35B证明主API接线可由同契约Mock稳定运行。接线完成后尚未再次消耗真实额度运行完整真人流程，公开分享网址也尚未更新本次代码。
 
 ## 10. 第八批：Phase 7 可点击前端外壳
 

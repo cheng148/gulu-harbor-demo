@@ -25,6 +25,7 @@ test("完成5轮动态对话，看到双层推荐并修改条件重新推荐", a
   }
 
   await expect(page).toHaveURL(/\/agent\/results$/);
+  await expect(page.getByRole("heading", { name: "选宠搭子帮你捋一捋" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "先看适合你的方向" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "再认识具体的小伙伴" })).toBeVisible();
   expect(await page.locator(".direction-card").count()).toBeGreaterThan(0);

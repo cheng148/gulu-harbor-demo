@@ -98,12 +98,48 @@ class DeterministicAPIProvider:
     def explain_recommendation(
         self, request: RecommendationExplanationRequest
     ) -> RecommendationExplanationResponse:
-        del request
-        return RecommendationExplanationResponse(intro="推荐已生成。", items=())
+        return RecommendationExplanationResponse(
+            intro="我把这次更值得认识的方向和伙伴整理好了。",
+            items=tuple(
+                f"{fact.subjectId}会保留原来的匹配结论和事实。"
+                for fact in request.facts
+            ),
+        )
 
     def review_safety(self, request: SafetyReviewRequest) -> SafetyReviewResponse:
         del request
         return SafetyReviewResponse(isApproved=True)
+
+
+class InvalidExplanationProvider(DeterministicAPIProvider):
+    def explain_recommendation(
+        self, request: RecommendationExplanationRequest
+    ) -> RecommendationExplanationResponse:
+        del request
+        return RecommendationExplanationResponse(
+            intro="这段说明缺少逐项对应。",
+            items=(),
+        )
+
+
+class RejectedSafetyProvider(DeterministicAPIProvider):
+    def review_safety(self, request: SafetyReviewRequest) -> SafetyReviewResponse:
+        del request
+        return SafetyReviewResponse(
+            isApproved=False,
+            flags=("包含未经支持的保证",),
+        )
+
+
+class ReplacedSafetyProvider(DeterministicAPIProvider):
+    def review_safety(self, request: SafetyReviewRequest) -> SafetyReviewResponse:
+        return SafetyReviewResponse(
+            isApproved=False,
+            flags=("已改为谨慎表达",),
+            safeReplacementTexts=tuple(
+                f"安全版本{index + 1}" for index, _ in enumerate(request.draftTexts)
+            ),
+        )
 
 
 @pytest.fixture
@@ -272,6 +308,111 @@ def test_second_answer_synchronously_returns_a_public_recommendation(
     assert data["nextQuestion"] is None
     assert data["recommendation"]["directions"]
     assert "internalScore" not in response.text
+
+
+def test_recommendation_is_explained_and_safety_reviewed_before_commit(
+    api: tuple[TestClient, FrozenClock],
+) -> None:
+    client, _ = api
+    conversation_id, _ = create_conversation(client)
+    send_first_answer(client, conversation_id)
+
+    response = client.post(
+        f"/api/v1/conversations/{conversation_id}/messages",
+        json={
+            "clientMessageId": "client-2",
+            "baseRevision": 1,
+            "content": "猫狗都不过敏。",
+            "quickReplyId": "猫狗都不过敏",
+        },
+    )
+
+    assert response.status_code == 200
+    recommendation = response.json()["data"]["recommendation"]
+    expected_subjects = [
+        *(item["directionId"] for item in recommendation["directions"]),
+        *(item["petId"] for item in recommendation["pets"]),
+    ]
+    assert recommendation["aiNarrative"]["intro"] == (
+        "我把这次更值得认识的方向和伙伴整理好了。"
+    )
+    assert [
+        item["subjectId"] for item in recommendation["aiNarrative"]["items"]
+    ] == expected_subjects
+
+
+@pytest.mark.parametrize(
+    "provider",
+    [InvalidExplanationProvider(), RejectedSafetyProvider()],
+)
+def test_invalid_or_unreviewed_explanation_rolls_back_the_whole_turn(
+    tmp_path: Path,
+    provider: DeterministicAPIProvider,
+) -> None:
+    clock = FrozenClock(datetime(2026, 8, 12, 10, tzinfo=UTC))
+    app = create_app(
+        settings=AppSettings(modelProvider=ModelProviderKind.MOCK),
+        conversation_repository=SQLiteConversationRepository(
+            tmp_path / "narrative-rollback.sqlite3"
+        ),
+        clock=clock,
+        model_provider=provider,
+    )
+    client = TestClient(app)
+    conversation_id, _ = create_conversation(client)
+    send_first_answer(client, conversation_id)
+    before = client.get(f"/api/v1/conversations/{conversation_id}").json()["data"]
+
+    response = client.post(
+        f"/api/v1/conversations/{conversation_id}/messages",
+        json={
+            "clientMessageId": "client-2",
+            "baseRevision": 1,
+            "content": "猫狗都不过敏。",
+            "quickReplyId": "猫狗都不过敏",
+        },
+    )
+
+    assert response.status_code == 502
+    assert response.json()["error"]["code"] == "MODEL_INVALID_RESPONSE"
+    after = client.get(f"/api/v1/conversations/{conversation_id}").json()["data"]
+    assert after == before
+
+
+def test_complete_safety_replacements_are_used_without_changing_candidates(
+    tmp_path: Path,
+) -> None:
+    clock = FrozenClock(datetime(2026, 8, 12, 10, tzinfo=UTC))
+    app = create_app(
+        settings=AppSettings(modelProvider=ModelProviderKind.MOCK),
+        conversation_repository=SQLiteConversationRepository(
+            tmp_path / "narrative-replacement.sqlite3"
+        ),
+        clock=clock,
+        model_provider=ReplacedSafetyProvider(),
+    )
+    client = TestClient(app)
+    conversation_id, _ = create_conversation(client)
+    send_first_answer(client, conversation_id)
+
+    response = client.post(
+        f"/api/v1/conversations/{conversation_id}/messages",
+        json={
+            "clientMessageId": "client-2",
+            "baseRevision": 1,
+            "content": "猫狗都不过敏。",
+            "quickReplyId": "猫狗都不过敏",
+        },
+    )
+
+    assert response.status_code == 200
+    recommendation = response.json()["data"]["recommendation"]
+    assert recommendation["aiNarrative"]["intro"] == "安全版本1"
+    assert all(
+        item["text"].startswith("安全版本")
+        for item in recommendation["aiNarrative"]["items"]
+    )
+    assert response.json()["data"]["warnings"] == ["已改为谨慎表达"]
 
 
 def test_invalid_quick_reply_is_rejected_without_a_write(

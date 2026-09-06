@@ -235,6 +235,50 @@
         "title": "ProfileUpdate",
         "type": "object"
       },
+      "PublicAINarrative": {
+        "additionalProperties": false,
+        "properties": {
+          "intro": {
+            "minLength": 1,
+            "title": "Intro",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PublicAINarrativeItem"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "intro",
+          "items"
+        ],
+        "title": "PublicAINarrative",
+        "type": "object"
+      },
+      "PublicAINarrativeItem": {
+        "additionalProperties": false,
+        "properties": {
+          "subjectId": {
+            "minLength": 1,
+            "title": "Subjectid",
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subjectId",
+          "text"
+        ],
+        "title": "PublicAINarrativeItem",
+        "type": "object"
+      },
       "PublicContactAction": {
         "additionalProperties": false,
         "properties": {
@@ -784,6 +828,16 @@
       "PublicRecommendation": {
         "additionalProperties": false,
         "properties": {
+          "aiNarrative": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicAINarrative"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "directions": {
             "items": {
               "$ref": "#/components/schemas/PublicDirectionResult"

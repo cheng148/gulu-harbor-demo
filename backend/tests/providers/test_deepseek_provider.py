@@ -8,6 +8,7 @@ import httpx
 import pytest
 from pydantic import SecretStr
 
+from app.domain.matching import MatchLevel
 from app.domain.profile_merge import ProfileDelta
 from app.providers.base import (
     ModelProvider,
@@ -19,6 +20,7 @@ from app.providers.base import (
     QuestionWordingResponse,
     RecommendationExplanationRequest,
     RecommendationExplanationResponse,
+    RecommendationFact,
     SafetyReviewRequest,
     SafetyReviewResponse,
 )
@@ -114,7 +116,15 @@ def test_all_four_operations_return_the_shared_provider_schemas() -> None:
     explanation_request = RecommendationExplanationRequest(
         scenarioId="basic-dog",
         stepId="turn-4-explain",
-        facts=(),
+        facts=(
+            RecommendationFact(
+                subjectId="pet-doubao",
+                matchLevel=MatchLevel.MEDIUM,
+                fitReasons=("互动节奏接近",),
+                tradeoffs=("陪伴时间仍需确认",),
+                mismatchPoints=(),
+            ),
+        ),
         pendingItems=("dailyCompanionHours",),
     )
     explanation_response = RecommendationExplanationResponse(
@@ -124,7 +134,7 @@ def test_all_four_operations_return_the_shared_provider_schemas() -> None:
     safety_request = SafetyReviewRequest(
         scenarioId="basic-dog",
         stepId="turn-4-safety",
-        draftTexts=explanation_response.items,
+        draftTexts=(explanation_response.intro, *explanation_response.items),
     )
     safety_response = SafetyReviewResponse(isApproved=True)
     contents = iter(
