@@ -24,6 +24,7 @@ from evaluation.metrics import (
 
 PROJECT_ROOT = Path(__file__).parents[1]
 BACKEND_ROOT = PROJECT_ROOT / "backend"
+CURRENT_RULE_VERSION = "SDD_SPEC 0.3.10"
 
 
 @dataclass(frozen=True)
@@ -428,15 +429,15 @@ def render_markdown_report(
         "- 模型提供方：MockProvider",
         "- 模型名：deterministic-fixtures",
         "",
-        "## 样本状态",
+        "## T41固定运行器结果",
         "",
         "| 项目 | 数量 |",
         "|---|---:|",
         f"| 样本总数 | {summary.sampleSize} |",
-        f"| 已执行 | {summary.evaluatedCaseCount} |",
-        f"| 已通过 | {summary.passedCaseCount} |",
+        f"| Mock已执行 | {summary.evaluatedCaseCount} |",
+        f"| Mock已通过 | {summary.passedCaseCount} |",
         f"| Bad Case | {len(summary.failedCaseIds)} |",
-        f"| 待T42执行 | {summary.deferredCaseCount} |",
+        f"| 当时延期到浏览器审查 | {summary.deferredCaseCount} |",
         "",
         "## Gate 5指标",
         "",
@@ -461,19 +462,32 @@ def render_markdown_report(
             lines.append(f"- {case_id}：{'；'.join(observation.failures)}")
     else:
         lines.append("- 本次已执行的Mock案例没有Bad Case。")
-    lines.extend(["", "## 尚未执行", ""])
-    for observation in summary.observations:
-        if observation.status is EvaluationStatus.DEFERRED:
-            lines.append(f"- {observation.caseId}：{observation.failures[0]}")
     lines.extend(
         [
+            "",
+            "## T42补充审查结果",
+            "",
+            "| 案例 | T42结果 | 结论 |",
+            "| --- | --- | --- |",
+            "| EVAL-034 | Manifest、192／512标准图标和完整核心流程已通过浏览器检查；实体手机系统安装动作未执行 | 部分验证，保留手工项 |",
+            "| EVAL-035 | 无需安装即可从普通链接进入首页、选宠并完成核心流程 | 通过 |",
+            "",
+            "因此36条固定案例目前是：34条Mock自动执行通过，1条浏览器案例通过，1条完成安装前置条件但仍保留实体手机手工步骤。不能把它写成“36条全自动通过”。",
             "",
             "## 解释边界",
             "",
             "- 通过表示关联的生产业务回归测试通过，不表示真人DeepSeek每次输出都相同。",
             "- 结构化输出成功率只适用于真人调用，本次Mock报告显示为不适用。",
-            "- 原型按钮反馈率本次只统计固定集已标注的联系商家按钮；全站明显按钮由T42真实浏览器审查。",
-            "- 手机安装与不支持安装时的回退需要真实浏览器和设备能力，统一由T42审查。",
+            "- 原型按钮反馈率仍只统计固定集已标注的联系商家按钮；T42另行确认七个主要页面的可见交互控件都有可读名称，并检查代表性弹窗键盘路径。",
+            "- T42完成浏览器安装前置条件和普通链接回退检查，但没有把桌面模拟当作实体手机系统安装证据。",
+            "",
+            "## 证据索引",
+            "",
+            "- 原始固定评测结果：`evaluation/results/mock-latest.json`",
+            "- 固定案例定义：`evaluation/cases.jsonl`",
+            "- 真人模型观察：`docs/evaluation/live-model-observations.md`",
+            "- 浏览器审查：`docs/qa/browser-check.md`",
+            "- 最终全量验证：属于T44，当前尚未生成`docs/qa/final-verification.md`",
             "",
         ]
     )
@@ -497,7 +511,7 @@ def _write_outputs(
         render_markdown_report(
             summary,
             dataset_version=dataset_version,
-            rule_version="SDD_SPEC 0.3.8",
+            rule_version=CURRENT_RULE_VERSION,
             generated_at=datetime.now(UTC).astimezone().isoformat(timespec="seconds"),
         ),
         encoding="utf-8",

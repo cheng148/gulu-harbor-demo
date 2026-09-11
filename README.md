@@ -4,6 +4,10 @@
 
 > 当前是可运行、可测试的第一版 Web App。首页交易数字、商家和在售宠物均为明确标注的 Demo 虚拟数据；平台不直接销售，也不对个体健康或性格作绝对保证。
 
+## 30秒介绍
+
+咕噜港验证的不是“让AI随便推荐宠物”，而是怎样把新手模糊的生活描述，变成可检查的选宠建议。大模型负责听懂和表达；代码负责过敏与底线、动态追问、候选过滤、内部评分和排序；SQLite保存唯一会话状态。这样既保留真实对话感，又能用固定案例证明关键规则没有被模型的随机性带偏。
+
 ## 这个项目做深了什么
 
 - 真实的多轮会话、24 小时本地会话引用与 SQLite 服务端状态
@@ -20,6 +24,8 @@
 公开体验版用于快速检查手机页面和原型交互；仓库中的 Next.js + FastAPI 工程还包含确定性 Mock Agent、SQLite 会话、完整测试和 DeepSeek 适配器，两者不要混为同一个部署形态。
 
 ## 架构与边界
+
+详细说明见[技术架构](docs/architecture.md)和[产品决策记录](docs/decisions.md)。
 
 ```mermaid
 flowchart LR
@@ -75,14 +81,26 @@ powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 
 验证包含：OpenAPI 类型漂移、ESLint、TypeScript、前端单元／组件测试、手机与桌面真实浏览器流程、生产构建、Ruff、mypy、后端测试和覆盖率。
 
+固定评测可以单独运行：
+
+```powershell
+Set-Location backend
+uv run python ..\evaluation\run.py
+```
+
+自动化命令必须保持Mock模式，不会读取或调用真实DeepSeek Key。真人演示和Mock测试为什么分开，见[演示脚本](docs/demo-script.md)。
+
 ## 重要文档
 
 - [产品与事实边界](PROJECT_CONTEXT.md)
 - [已批准的规格](specs/SDD_SPEC.md)
 - [实施计划](specs/IMPLEMENTATION_PLAN.md)
 - [TDD 任务与证据](specs/TASKS.md)
+- [技术架构](docs/architecture.md)
 - [重要决策记录](docs/decisions.md)
 - [真人模型观察](docs/evaluation/live-model-observations.md)
+- [固定评测报告](docs/evaluation/report.md)
+- [浏览器检查记录](docs/qa/browser-check.md)
 - [演示脚本](docs/demo-script.md)
 
 ## 安全说明
@@ -94,4 +112,4 @@ powershell -ExecutionPolicy Bypass -File scripts\verify.ps1
 
 ## 当前进度
 
-Gate 0 规格、Gate 1 计划、UX-01 和 T06R–T39 已完成；Phase 6真人演示与Phase 7前端外壳均已通过，公开手机体验版可用。下一步进入Phase 8：固定评测集、完整浏览器审查、展示材料和最终全量验证。完整FastAPI与DeepSeek后端尚未部署到公开网址，第一版也尚未完成最终验收。
+Gate 0规格、Gate 1计划、UX-01和T06R至T43已完成；Phase 6真人演示、Phase 7前端外壳、固定Mock评测和T42浏览器审查已有证据。下一项是T44最终全量验证和用户验收。完整FastAPI、SQLite与DeepSeek后端尚未部署到公开网址；公开手机体验版仍是前端原型分享版，不能当作完整系统已经上线。
