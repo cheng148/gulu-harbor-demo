@@ -112,4 +112,4 @@ uv run python ..\evaluation\run.py
 
 ## 当前进度
 
-Gate 0规格、Gate 1计划、UX-01和T06R至T43已完成；Phase 6真人演示、Phase 7前端外壳、固定Mock评测和T42浏览器审查已有证据。下一项是T44最终全量验证和用户验收。完整FastAPI、SQLite与DeepSeek后端尚未部署到公开网址；公开手机体验版仍是前端原型分享版，不能当作完整系统已经上线。
+Gate 0规格、Gate 1计划、UX-01和T06R至T44的本地技术验证已完成，当前等待用户验收。前后端全量测试、固定Mock评测和本地真实浏览器检查均已通过；完整FastAPI、SQLite与DeepSeek后端尚未部署到公开网址，公开手机体验版仍是前端原型分享版，不能当作完整系统已经上线。

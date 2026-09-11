@@ -24,7 +24,7 @@ from evaluation.metrics import (
 
 PROJECT_ROOT = Path(__file__).parents[1]
 BACKEND_ROOT = PROJECT_ROOT / "backend"
-CURRENT_RULE_VERSION = "SDD_SPEC 0.3.10"
+CURRENT_RULE_VERSION = "SDD_SPEC 0.3.11"
 
 
 @dataclass(frozen=True)
@@ -487,7 +487,7 @@ def render_markdown_report(
             "- 固定案例定义：`evaluation/cases.jsonl`",
             "- 真人模型观察：`docs/evaluation/live-model-observations.md`",
             "- 浏览器审查：`docs/qa/browser-check.md`",
-            "- 最终全量验证：属于T44，当前尚未生成`docs/qa/final-verification.md`",
+            "- 最终全量验证：`docs/qa/final-verification.md`",
             "",
         ]
     )

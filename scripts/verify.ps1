@@ -63,4 +63,4 @@ finally {
     Pop-Location
 }
 
-Write-Host "`nT32和当前已实现范围的检查全部通过。固定评测和DeepSeek接入将在对应获批阶段加入。"
+Write-Host "`n当前已实现范围的基础检查全部通过。固定Mock评测由T44独立运行；真人DeepSeek结果只读取既有记录，不纳入确定性自动测试。"

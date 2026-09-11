@@ -144,9 +144,11 @@ def test_report_preserves_mock_results_and_completed_t42_browser_evidence() -> N
     assert "待T42执行" not in report
     assert "真人模型指标不得用本报告冒充" in report
     assert "浏览器审查：`docs/qa/browser-check.md`" in report
+    assert "最终全量验证：`docs/qa/final-verification.md`" in report
+    assert "当前尚未生成" not in report
 
 
-def test_output_writer_uses_the_current_t43_rule_version(tmp_path: Path) -> None:
+def test_output_writer_uses_the_current_rule_version(tmp_path: Path) -> None:
     observations = tuple(
         build_case_observation(plan, passed=True)
         for plan in CASE_PLANS.values()
@@ -163,7 +165,7 @@ def test_output_writer_uses_the_current_t43_rule_version(tmp_path: Path) -> None
     )
 
     report = report_path.read_text(encoding="utf-8")
-    assert "规则版本：SDD_SPEC 0.3.10" in report
+    assert "规则版本：SDD_SPEC 0.3.11" in report
     assert "待T42执行" not in report
 
 

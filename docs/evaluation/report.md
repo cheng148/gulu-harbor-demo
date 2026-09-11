@@ -4,9 +4,9 @@
 
 本报告来自确定性Mock回归测试：只替换模型边界，业务规则仍运行生产代码；不读取DeepSeek Key、不访问模型网络。真人模型指标不得用本报告冒充。
 
-- 生成时间：2026-09-11T22:34:53+08:00
+- 生成时间：2026-09-11T22:56:03+08:00
 - 数据集版本：1.0.0
-- 规则版本：SDD_SPEC 0.3.10
+- 规则版本：SDD_SPEC 0.3.11
 - 模型提供方：MockProvider
 - 模型名：deterministic-fixtures
 
@@ -62,4 +62,4 @@
 - 固定案例定义：`evaluation/cases.jsonl`
 - 真人模型观察：`docs/evaluation/live-model-observations.md`
 - 浏览器审查：`docs/qa/browser-check.md`
-- 最终全量验证：属于T44，当前尚未生成`docs/qa/final-verification.md`
+- 最终全量验证：`docs/qa/final-verification.md`
